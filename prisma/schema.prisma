@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  displayName String
+  password    String
+  userType    String   @default("human") // "human" | "system"
+  groups      GroupMember[]
+  messages    Message[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Group {
+  id          String   @id @default(cuid())
+  name        String
+  groupType   String
+  topic       String
+  inviteLink  String  @unique 
+  members     GroupMember[]
+  messages    Message[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model GroupMember {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  group     Group    @relation(fields: [groupId], references: [id])
+  groupId   String
+  role      String   @default("member") // "member" | "admin"
+  joinedAt  DateTime @default(now())
+
+  @@unique([userId, groupId])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  suggestion  Json?
+  sender    User     @relation(fields: [senderId], references: [id])
+  senderId  String
+  group     Group    @relation(fields: [groupId], references: [id])
+  groupId   String
+  createdAt DateTime @default(now())
+}
