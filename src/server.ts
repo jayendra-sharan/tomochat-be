@@ -1,29 +1,36 @@
 import express from "express";
 import { createYoga } from "graphql-yoga";
 import { Server } from 'socket.io';
-import http from "http";
 import { schema } from "./graphql/schemas";
 import cors from "cors";
 import { createContext } from "./graphql/resolvers/context";
 import { prisma } from "./db/prisma";
+import { createServer } from "http";
+
 
 const app = express();
-const server = http.createServer(app);
 
-const io = new Server(server, {
-  cors: {
-    origin: '*'
-  }
-});
+const httpServer = createServer(app);
+const io = new Server(httpServer, { cors: { origin: '*' } });
 
 export { io };
 
 const yoga = createYoga({
   schema,
   context: createContext,
+  maskedErrors: false,
+  graphqlEndpoint: '/graphql',
+  cors: {
+    origin: '*',
+    credentials: true
+  }
 });
 
+app.set('trust proxy', true);
 app.use(cors());
+app.get("/", (_, res) => {
+  res.send("OK");
+});
 app.use('/graphql', yoga.requestListener);
 io.on("connection", (socket) => {
   console.log("User connected", socket.id);
@@ -65,6 +72,8 @@ io.on("connection", (socket) => {
 
 });
 
-server.listen(3001, '0.0.0.0', () => {
-  console.log('Server ready at http://localhost:3001');
+const PORT = Number(process.env.PORT) || 3001;
+
+httpServer.listen(PORT, '0.0.0.0', () => {
+  console.log('Server running at port: ', PORT);
 });
