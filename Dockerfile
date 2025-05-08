@@ -22,10 +22,10 @@ RUN npm install --only=production
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 
-# Generate Prisma Client
+# Generate Prisma Client (does not need real DATABASE_URL)
 RUN npx prisma generate
 
 EXPOSE 3001
 
-# Run app → NOTE: we fixed the CMD to dist/index.js
-CMD ["node", "dist/server.js"]
+# Run migrations at runtime (with real DATABASE_URL from EB env vars) and start server
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/server.js"]
