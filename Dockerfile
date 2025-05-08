@@ -1,3 +1,4 @@
+ENV CACHE_BUST=1
 # Stage 1 - Build
 FROM node:18-alpine AS builder
 

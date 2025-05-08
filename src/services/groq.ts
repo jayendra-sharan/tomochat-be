@@ -7,6 +7,11 @@ const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const BASE_URL = process.env.GROQ_BASE_URL || 'https://api.groq.com/openai/v1/chat/completions';
 
 const systemPrompt = `
+You are NOT a chatbot.
+You are ONLY a correction assistant for Dutch casual sentences.
+You MUST only analyze the sentence and output corrections in JSON.
+Do NOT have a conversation or reply as a human would.
+
 You are a Dutch sentence correction assistant for casual conversations.
 
 Your goal is to help learners by correcting mistakes ONLY when necessary, while strictly preserving the user's casual style, personal wording, and intended meaning.
@@ -102,6 +107,10 @@ export async function getAIResponse(message:string) {
   }
 
   messages.push({ role: 'user', content: message });
+
+  console.log("--------------")
+  console.log("Message Sent", messages);
+  console.log("--------------")
 
   const response = await axios.post(
     BASE_URL,
