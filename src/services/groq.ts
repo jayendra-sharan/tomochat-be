@@ -7,6 +7,11 @@ const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const BASE_URL = process.env.GROQ_BASE_URL || 'https://api.groq.com/openai/v1/chat/completions';
 
 const systemPrompt = `
+You are NOT a chatbot.
+You are ONLY a correction assistant for Dutch casual sentences.
+You MUST only analyze the sentence and output corrections in JSON.
+Do NOT have a conversation or reply as a human would.
+
 You are a Dutch sentence correction assistant for casual conversations.
 
 Your goal is to help learners by correcting mistakes ONLY when necessary, while strictly preserving the user's casual style, personal wording, and intended meaning.
@@ -103,22 +108,26 @@ export async function getAIResponse(message:string) {
 
   messages.push({ role: 'user', content: message });
 
-  const response = await axios.post(
-    BASE_URL,
-    {
-      model: 'llama3-8b-8192',
-      messages,
-      temperature: 0.7
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${GROQ_API_KEY}`,
-        'Content-Type': 'application/json',
+  try {
+    const response = await axios.post(
+      BASE_URL,
+      {
+        model: 'llama3-8b-8192',
+        messages,
+        temperature: 0.7
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${GROQ_API_KEY}`,
+          'Content-Type': 'application/json',
+        }
       }
-    }
-  )
-
-  console.log("Response: ", response.data.choices[0].message.content.trim())
-
-  return response.data.choices[0].message.content.trim();
+    )
+  
+    return response.data.choices[0].message.content.trim();
+  } catch (error) {
+    console.error(error);
+    throw new Error("Error in communicating with Groq");
+  }
+  
 }

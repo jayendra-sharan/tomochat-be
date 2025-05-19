@@ -29,6 +29,7 @@ model Group {
   messages    Message[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  lastMessage String  @default("")
 }
 
 model GroupMember {

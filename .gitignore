@@ -4,3 +4,9 @@ node_modules
 prisma/.env
 prisma/generated/
 src/generated/
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+docker-compose.yml
+dist
