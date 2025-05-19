@@ -28,6 +28,21 @@ app.get('/', (_, res) => {
   res.send('OK');
 });
 app.use('/graphql', yoga.requestListener);
+app.get('/run-migrations', async (req, res) => {
+  // const auth = req.headers.authorization;
+  // const token = auth?.split(' ')[1];
+
+  // basic secret check (replace with real token validation)
+  // if (token !== process.env.ADMIN_MIGRATION_TOKEN) {
+  //   return res.status(403).send('Forbidden');
+  // }
+
+  const { exec } = await import('child_process');
+  exec('npx prisma migrate deploy', (err, stdout, stderr) => {
+    if (err) return res.status(500).send(`Error: ${stderr}`);
+    return res.send(`Success: ${stdout}`);
+  });
+});
 
 const PORT = Number(process.env.PORT) || 3001;
 httpServer.listen(PORT, () => {
