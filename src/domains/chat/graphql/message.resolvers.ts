@@ -78,7 +78,7 @@ export const messageResolvers = {
           id: groupId
         },
         data: {
-          lastMessage
+          lastMessage: `${input.displayName}: ${lastMessage}`,
         }
       });
 

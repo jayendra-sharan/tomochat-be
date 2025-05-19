@@ -32,6 +32,7 @@ export const messageTypeDefs = gql`
     groupId: String!
     content: String!
     isPrivate: Boolean
+    displayName: String!
   }
 
   input ClearGroupMessagesInput {

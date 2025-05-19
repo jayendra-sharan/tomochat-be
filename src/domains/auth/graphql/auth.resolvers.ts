@@ -43,7 +43,7 @@ export const authResolvers = {
     login: async (_, { input }, { prisma }) => {
       const user = await prisma.user.findUnique({ where: { email: input.email } });
       if (!user || !bcryptjs.compare(input.password, user.password)) {
-        return { error: "Invalid email address or password" };
+        throw new Error("Invalid email address or password");
       }
       
       const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: "1d" });
@@ -59,7 +59,7 @@ export const authResolvers = {
       return prisma.user.create({
         data: {
           ...input,
-          userType: "human",
+          userType: input.userType || "human",
           password: hashedPassword
         }
       });

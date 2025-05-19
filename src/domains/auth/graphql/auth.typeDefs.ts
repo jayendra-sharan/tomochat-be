@@ -20,6 +20,7 @@ export const authTypeDefs = gql`
     email: String!
     displayName: String!
     password: String!
+    userType: String
   }
 
   input LoginInput {
