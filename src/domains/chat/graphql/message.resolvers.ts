@@ -1,4 +1,5 @@
 import { SocketEvents } from '@/constants/socketEvents';
+import { sendUserNotification } from '@/domains/notification/service';
 import { logger } from '@/lib/logger';
 import { groqAi } from '@/services';
 
@@ -82,6 +83,7 @@ export const messageResolvers = {
         }
       });
 
+      sendUserNotification(userId, "New message", lastMessage, prisma);
       io.to(input.groupId).emit(SocketEvents.NEW_MESSAGE, {
         ...message,
         createdAt: message.createdAt.toISOString(),

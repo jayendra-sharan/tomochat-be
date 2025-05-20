@@ -1,4 +1,3 @@
-import { createSchema } from "graphql-yoga";
 import { mergeTypeDefs, mergeResolvers } from "@graphql-tools/merge"
 
 import { authTypeDefs } from "@/domains/auth/graphql/auth.typeDefs";
@@ -13,20 +12,25 @@ import { GraphQLContext } from "./context";
 import { rootTypeDefs } from "@/domains/shared/graphql/root.typeDefs";
 import { roomsTypeDefs } from "@/domains/rooms/graphql/rooms.typeDefs";
 import { roomsResolvers } from "@/domains/rooms/graphql/rooms.resolver";
+import { notificationTypeDefs } from "@/domains/notification/graphql/typeDefs";
+import { notificationResolvers } from "@/domains/notification/graphql/resolver";
+import { makeExecutableSchema } from "@graphql-tools/schema";
 
-export const schema = createSchema<GraphQLContext>({
+export const schema = makeExecutableSchema<GraphQLContext>({
   typeDefs: mergeTypeDefs([
     rootTypeDefs,
     roomsTypeDefs,
     authTypeDefs,
     groupTypeDefs,
     messageTypeDefs,
+    notificationTypeDefs,
   ]),
   resolvers: mergeResolvers([
     authResolvers,
     roomsResolvers,
     groupResolvers,
     messageResolvers,
+    notificationResolvers,
     sharedResolvers,
   ])
 });

@@ -1,3 +1,4 @@
+import { GraphQLContext } from "@/app/context";
 import { logger } from "@/lib/logger";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -8,7 +9,7 @@ export const authResolvers = {
   Query: {
     me: async (_: any, _args: any, { userId, prisma}) => {
       if (!userId) {
-        return "User not authenticated"
+        throw new Error("User not authenticated");
       }
 
       const user = await prisma.user.findUnique({
@@ -30,7 +31,7 @@ export const authResolvers = {
         }
       });
       if (!user) {
-        return "User not found";
+        throw new Error("User not found!");
       }
 
       const groups = user.groups.map((gm) => gm.group);

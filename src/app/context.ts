@@ -1,8 +1,8 @@
-import { prisma } from '@/lib/prisma';
 import jwt from 'jsonwebtoken';
 import { io } from './server';
 import { YogaInitialContext } from 'graphql-yoga';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 import { Server as SocketIOServer } from 'socket.io';
 import { logger } from '@/lib/logger';
 
