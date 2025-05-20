@@ -8,7 +8,9 @@ export const roomsResolvers = {
       if (!userId) return "User not authenticated!"      
 
       const memberships = await prisma.groupMember.findMany({
-        where: { userId },
+        where: {
+          userId
+        },
         include: {
           group: { 
             include: {
@@ -18,6 +20,11 @@ export const roomsResolvers = {
                 }
               }
             }
+          }
+        },
+        orderBy: {
+          group: {
+            updatedAt: "desc"
           }
         }
       });
