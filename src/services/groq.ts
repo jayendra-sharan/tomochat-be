@@ -124,7 +124,7 @@ export async function getAIResponse(message:string) {
       }
     )
   
-    return response.data.choices[0].message.content.trim();
+    return JSON.parse(response.data.choices[0].message.content.trim());
   } catch (error) {
     console.error(error);
     throw new Error("Error in communicating with Groq");

@@ -19,6 +19,7 @@ model User {
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   notificationTokens NotificationToken[]
+  MessageStatus      MessageStatus[]
 }
 
 model Group {
@@ -47,14 +48,15 @@ model GroupMember {
 }
 
 model Message {
-  id         String   @id @default(cuid())
-  content    String
-  suggestion Json?
-  sender     User     @relation(fields: [senderId], references: [id])
-  senderId   String
-  group      Group    @relation(fields: [groupId], references: [id])
-  groupId    String
-  createdAt  DateTime @default(now())
+  id            String          @id @default(cuid())
+  content       String
+  suggestion    Json?
+  sender        User            @relation(fields: [senderId], references: [id])
+  senderId      String
+  group         Group           @relation(fields: [groupId], references: [id])
+  groupId       String
+  createdAt     DateTime        @default(now())
+  perUserStatus MessageStatus[]
 }
 
 model NotificationToken {
@@ -67,4 +69,20 @@ model NotificationToken {
   updatedAt DateTime @updatedAt
 
   @@unique([token, platform])
+}
+
+model MessageStatus {
+  id        String  @id @default(cuid())
+  message   Message @relation(fields: [messageId], references: [id])
+  messageId String
+  user      User    @relation(fields: [userId], references: [id])
+  userId    String
+
+  isRead    Boolean   @default(false)
+  isDeleted Boolean   @default(false)
+  delivered Boolean   @default(false)
+  readAt    DateTime?
+  deletedAt DateTime?
+
+  @@unique([messageId, userId])
 }

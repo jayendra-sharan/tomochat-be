@@ -2,6 +2,7 @@ import { SocketEvents } from '@/constants/socketEvents';
 import { sendUserNotification } from '@/domains/notification/service';
 import { logger } from '@/lib/logger';
 import { groqAi } from '@/services';
+import { sendMessageService } from '../services/message.service';
 
 export const messageResolvers = {
   Query: {
@@ -47,49 +48,8 @@ export const messageResolvers = {
   },
 
   Mutation: {
-    sendMessage: async (_, { input }, { userId, io, prisma }) => {
-      const { isPrivate, groupId, content } = input;
-      let aiReply = "";
-      let suggestion = null;
-      
-      if (!isPrivate) {
-        const response = await groqAi(input.content);
-        const responseJson = JSON.parse(response);
-        aiReply = responseJson.aiReply;
-        suggestion = {
-          original: content,
-          ...responseJson,
-        }
-      }
-
-      const lastMessage = isPrivate ? content : aiReply
-
-      const message = await prisma.message.create({
-        data: {
-          content: lastMessage,
-          senderId: userId,
-          groupId: groupId,
-          suggestion,
-        },
-        include: { sender: true, group: true },
-      });
-
-      await prisma.group.update({
-        where: {
-          id: groupId
-        },
-        data: {
-          lastMessage: `${input.displayName}: ${lastMessage}`,
-        }
-      });
-
-      sendUserNotification(userId, "New message", lastMessage, prisma);
-      io.to(input.groupId).emit(SocketEvents.NEW_MESSAGE, {
-        ...message,
-        createdAt: message.createdAt.toISOString(),
-      });
-
-      return message;
+    sendMessage: async (_, { input }, { user, io, prisma }) => {
+      return sendMessageService({ input, user, prisma, io});
     },
 
     clearGroupMessages: async (_, { input }, { userId, prisma }) => {

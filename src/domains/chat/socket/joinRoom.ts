@@ -1,8 +1,17 @@
+import { isRoomMember } from "@/domains/rooms/db/isRoomMember.db";
 import { logger } from "@/lib/logger";
 import type { Socket } from "socket.io";
 
-export const handleJoinRoom = (socket: Socket, payload: any) => {
+export const handleJoinRoom = async (socket: Socket, payload: any) => {
+  const { userId } = socket.data;
   const { roomId } = payload
-  logger.info("User joining room", payload);
-  socket.join(roomId);
+  const isMember = await isRoomMember({ userId, roomId });
+  if (!isMember) {
+    logger.warn(`Unauthorised room join attempt by ${userId} to room ${roomId}`);
+    return socket.disconnect();
+  }
+  if (isMember) {
+    socket.join(roomId);
+    logger.info(`${userId} has joined the room ${roomId}`);
+  }
 }
