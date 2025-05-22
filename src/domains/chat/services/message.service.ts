@@ -4,6 +4,8 @@ import { SocketEvents } from "@/constants/socketEvents";
 import { getAiResponse } from "../utils/ai";
 import { createMessageDb } from "../db/message.db";
 import { logger } from "@/lib/logger";
+import { getUserSockets } from "@/domains/socket/socketRegistry";
+import { emitInAppNotification } from "@/domains/socket/socketService";
 
 export const sendMessageService = async ({ input, user, prisma, io }) => {
   const { isPrivate, groupId, content } = input;
@@ -14,7 +16,7 @@ export const sendMessageService = async ({ input, user, prisma, io }) => {
   const suggestion = isPrivate ? null : await getAiResponse(input.content);
 
 
-  const { message, membersId, name: groupName } = await prisma.$transaction(async (tx) => {
+  const { message, membersId, name: roomName } = await prisma.$transaction(async (tx) => {
     const dbTx = createMessageDb({ prisma: tx, user, groupId });
 
     const message = await dbTx.createMessage(lastMessage, suggestion);
@@ -32,7 +34,16 @@ export const sendMessageService = async ({ input, user, prisma, io }) => {
 
   membersId.map(userId => {
     if (userId !== id) {
-      logger.info("Sending update", { lastMessage, senderDisplayName: displayName, groupName  });
+      logger.info("Not", userId);
+      emitInAppNotification({
+        io,
+        userId,
+        data: {
+          message: lastMessage,
+          displayName,
+          roomName,
+        }
+      });
     }
   })
 

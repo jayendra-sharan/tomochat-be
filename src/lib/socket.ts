@@ -5,7 +5,7 @@ import { handleJoinRoom } from '@/domains/chat/socket/joinRoom';
 import { SocketEvents } from '@/constants/socketEvents';
 import { logger } from './logger';
 import { handleUserTyping } from '@/domains/chat/socket/userTyping';
-import { removeUserSocket } from '@/domains/socket/socketRegistry';
+import { addUserSocket, removeUserSocket } from '@/domains/socket/socketRegistry';
 
 // @todo move it to new file
 interface AuthTokenPayload {
@@ -27,7 +27,7 @@ export function initSocket(io: Server) {
       socket.data.userId = userId;
       logger.info(`User connected | ${userId} (${socket.id})`);
       
-      // addUserSocket(userId, socket.id);
+      addUserSocket(userId, socket.id);
 
       socket.on(SocketEvents.JOIN_ROOM, (payload) => handleJoinRoom(socket, payload));
       // @todo possibly remove, message is reached to BE via graphql mutation.
