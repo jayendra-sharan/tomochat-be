@@ -14,7 +14,7 @@ model User {
   displayName        String
   password           String
   userType           String              @default("human") // "human" | "system"
-  groups             GroupMember[]
+  rooms              RoomMember[]
   messages           Message[]
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
@@ -22,29 +22,29 @@ model User {
   MessageStatus      MessageStatus[]
 }
 
-model Group {
-  id          String        @id @default(cuid())
+model Room {
+  id          String       @id @default(cuid())
   name        String
-  groupType   String
+  roomType    String
   topic       String
-  inviteLink  String        @unique
-  members     GroupMember[]
+  inviteLink  String       @unique
+  members     RoomMember[]
   messages    Message[]
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  lastMessage String        @default("")
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  lastMessage String       @default("")
 }
 
-model GroupMember {
+model RoomMember {
   id       String   @id @default(cuid())
   user     User     @relation(fields: [userId], references: [id])
   userId   String
-  group    Group    @relation(fields: [groupId], references: [id])
-  groupId  String
+  room     Room     @relation(fields: [roomId], references: [id])
+  roomId   String
   role     String   @default("member") // "member" | "admin"
   joinedAt DateTime @default(now())
 
-  @@unique([userId, groupId])
+  @@unique([userId, roomId])
 }
 
 model Message {
@@ -53,8 +53,8 @@ model Message {
   suggestion    Json?
   sender        User            @relation(fields: [senderId], references: [id])
   senderId      String
-  group         Group           @relation(fields: [groupId], references: [id])
-  groupId       String
+  room          Room            @relation(fields: [roomId], references: [id])
+  roomId        String
   createdAt     DateTime        @default(now())
   perUserStatus MessageStatus[]
 }

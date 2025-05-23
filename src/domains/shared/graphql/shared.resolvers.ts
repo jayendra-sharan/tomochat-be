@@ -1,7 +1,7 @@
 export const sharedResolvers = {
-  GroupMember: {
+  RoomMember: {
     user: (parent) => parent.user,
-    group: (parent) => parent.group,
+    room: (parent) => parent.room,
     joinedAt: (parent) => parent.joinedAt.toISOString()
   },
   Message: {

@@ -1,11 +1,9 @@
 import { mergeTypeDefs, mergeResolvers } from "@graphql-tools/merge"
 
 import { authTypeDefs } from "@/domains/auth/graphql/auth.typeDefs";
-import { groupTypeDefs } from "@/domains/groups/graphql/group.typeDefs";
 import { messageTypeDefs } from "@/domains/chat/graphql/message.typeDefs";
 
 import { authResolvers } from "@/domains/auth/graphql/auth.resolvers";
-import { groupResolvers } from "@/domains/groups/graphql/group.resolver";
 import { messageResolvers } from "@/domains/chat/graphql/message.resolvers";
 import { sharedResolvers } from "@/domains/shared/graphql/shared.resolvers";
 import { GraphQLContext } from "./context";
@@ -21,14 +19,12 @@ export const schema = makeExecutableSchema<GraphQLContext>({
     rootTypeDefs,
     roomsTypeDefs,
     authTypeDefs,
-    groupTypeDefs,
     messageTypeDefs,
     notificationTypeDefs,
   ]),
   resolvers: mergeResolvers([
     authResolvers,
     roomsResolvers,
-    groupResolvers,
     messageResolvers,
     notificationResolvers,
     sharedResolvers,

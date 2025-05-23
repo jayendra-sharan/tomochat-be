@@ -6,32 +6,32 @@ import { sendMessageService } from '../services/message.service';
 
 export const messageResolvers = {
   Query: {
-    groupMessages: async (_, { input }, { userId, prisma }) => {
-      const { groupId } = input;
+    roomMessages: async (_, { input }, { userId, prisma }) => {
+      const { roomId } = input;
       if (!userId) {
         return "User not authenticated";
       }
 
-      const membership = await prisma.groupMember.findFirst({
-        where: { userId, groupId }
+      const membership = await prisma.roomMember.findFirst({
+        where: { userId, roomId }
       });
 
       if (!membership) {
-        return "You are not a member of this group";
+        return "You are not a member of this chat room";
       }
 
-      const group = await prisma.group.findUnique({
-        where: { id: groupId }
+      const room = await prisma.room.findUnique({
+        where: { id: roomId }
       });
 
 
       const messages = await prisma.message.findMany({
         where: {
-          groupId
+          roomId
         },
         include: {
           sender: true,
-          group: true,
+          room: true,
           perUserStatus: {
             select: {
               userId: true,
@@ -50,8 +50,8 @@ export const messageResolvers = {
 
       return {
         messages,
-        name: group.name,
-        id: groupId,
+        name: room.name,
+        id: roomId,
         userId
       }
     },
@@ -62,16 +62,16 @@ export const messageResolvers = {
       return sendMessageService({ input, user, prisma, io});
     },
 
-    clearGroupMessages: async (_, { input }, { userId, prisma }) => {
+    clearRoomMessages: async (_, { input }, { userId, prisma }) => {
       if (!userId) throw new Error("Not authenticated");
 
-      const membership = await prisma.groupMember.findFirst({
-        where: { userId, groupId: input.groupId },
+      const membership = await prisma.roomMember.findFirst({
+        where: { userId, roomId: input.roomId },
       });
 
-      if (!membership) throw new Error("You are not a member of this group");
+      if (!membership) throw new Error("You are not a member of this chat room");
 
-      await prisma.message.deleteMany({ where: { groupId: input.groupId } });
+      await prisma.message.deleteMany({ where: { roomId: input.roomId } });
       return true;
     },
   },

@@ -8,7 +8,6 @@ type AIResponse = {
 }
 export const getAiResponse = async (message: string): Promise<AIResponse> => {
   const response = await groqAi(message);
-  // const aiReply = response.aiReply;
   return {
     original: message,
     ...response

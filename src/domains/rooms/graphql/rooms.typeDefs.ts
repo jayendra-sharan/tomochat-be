@@ -2,21 +2,21 @@
 import gql from "graphql-tag";
 
 export const roomsTypeDefs = gql`
-  type Member {
+  type RoomMember {
     id: ID!
     user: User!
     role: String!
-    room: Group!
+    room: Room!
     joinedAt: String!
   }
 
   type Room {
     id: ID!
     name: String!
-    groupType: String!
+    roomType: String!
     topic: String!
     inviteLink: String!
-    members: [GroupMember!]!
+    members: [RoomMember!]!
     adminUserIds: [ID!]!
     createdAt: String
     updatedAt: String

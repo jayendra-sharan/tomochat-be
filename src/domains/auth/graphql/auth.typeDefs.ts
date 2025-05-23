@@ -6,7 +6,7 @@ export const authTypeDefs = gql`
     email: String!
     displayName: String!
     userType: String!
-    groups: [Group!]!
+    rooms: [Room!]!
     createdAt: String!
     updatedAt: String!
   }

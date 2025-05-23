@@ -8,10 +8,10 @@ export async function isRoomMember({
   userId,
   roomId,
 }: IsRoomMemberPayload) {
-  return await prisma.groupMember.findFirst({
+  return await prisma.roomMember.findFirst({
     where: {
       userId,
-      groupId: roomId,
+      roomId,
     }
   });
 }

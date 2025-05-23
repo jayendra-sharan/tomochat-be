@@ -10,12 +10,12 @@ export const messageTypeDefs = gql`
     id: ID!
     content: String!
     sender: User!
-    group: Group!
+    room: Room!
     suggestion: Suggestion
     createdAt: String!
     perUserStatus: [MessageStatus!]!
   }
-  type GroupMessages {
+  type RoomMessages {
     messages: [Message!]!
     name: String!
     id: ID!
@@ -30,27 +30,27 @@ export const messageTypeDefs = gql`
     issues: [String!]!
   }
 
-  input GroupMessagesInput {
-    groupId: ID!
+  input RoomMessagesInput {
+    roomId: ID!
   }
 
   input SendMessageInput {
-    groupId: String!
+    roomId: String!
     content: String!
     isPrivate: Boolean
     displayName: String!
   }
 
-  input ClearGroupMessagesInput {
-    groupId: ID!
+  input ClearRoomMessagesInput {
+    roomId: ID!
   }
 
   extend type Query {
-    groupMessages(input: GroupMessagesInput!): GroupMessages!
+    roomMessages(input: RoomMessagesInput!): RoomMessages!
   }
 
   extend type Mutation {
     sendMessage(input: SendMessageInput!): Message!
-    clearGroupMessages(input: ClearGroupMessagesInput!): Boolean!
+    clearRoomMessages(input: ClearRoomMessagesInput!): Boolean!
   }
 `;

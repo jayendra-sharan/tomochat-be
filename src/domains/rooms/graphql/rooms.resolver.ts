@@ -7,12 +7,12 @@ export const roomsResolvers = {
     rooms: async (_, __, { userId, prisma }) => {
       if (!userId) return "User not authenticated!"      
 
-      const memberships = await prisma.groupMember.findMany({
+      const memberships = await prisma.roomMember.findMany({
         where: {
           userId
         },
         include: {
-          group: { 
+          room: { 
             include: {
               members: {
                 include: {
@@ -36,24 +36,24 @@ export const roomsResolvers = {
           }
         },
         orderBy: {
-          group: {
+          room: {
             updatedAt: "desc"
           }
         }
       });
 
       
-      const groups = memberships.map(m => {
-        const group = m.group;
-        const lastMessage = group.messages?.[0];
+      const rooms = memberships.map(m => {
+        const room = m.room;
+        const lastMessage = room.messages?.[0];
         const isUnread = lastMessage?.perUserStatus?.[0].isRead === false;
         return {
-          ...group,
+          ...room,
           lastMessage: lastMessage.content,
           isUnread,
         }
       });
-      return groups;
+      return rooms;
     }
   },
   Mutation: {
@@ -65,14 +65,14 @@ export const roomsResolvers = {
       const inviteLink = crypto.randomBytes(4).toString("hex");
       const { name, language, userDisplayName } = input;
 
-      // @todo update mapping of fields in groups schemam
+      // @todo update mapping of fields in rooms schemam
       const fields = {
         name,
-        groupType: "private",
+        roomType: "private",
         topic: language,
       }
 
-      const room = await prisma.group.create({
+      const room = await prisma.room.create({
         data: {
           ...fields,
           inviteLink,
@@ -87,7 +87,7 @@ export const roomsResolvers = {
         data: {
           content: `${userDisplayName} created ${room.name}.`,
           senderId: userId,
-          groupId: room.id,
+          roomId: room.id,
         }
       });
 
@@ -102,30 +102,30 @@ export const roomsResolvers = {
       }
 
       // @todo purpose of inviteId - maybe check expiry
-      const [groupId] = input.inviteLink.split("--");
+      const [roomId] = input.inviteLink.split("--");
       logger.debug("Input", input);
-      const existing = await prisma.groupMember.findFirst({
+      const existing = await prisma.roomMember.findFirst({
         where: {
-          groupId,
+          roomId,
           userId,
         }
       });
 
-      logger.debug("Exisiting", {existing, groupId, userId});
+      logger.debug("Exisiting", {existing, roomId, userId});
 
       if (existing) {
-        const group = prisma.group.findUnique({
+        const room = prisma.room.findUnique({
           where: {
-            groupId
+            roomId
           }
         });
         // @todos fix return type
-        return group;
+        return room;
       }
       
-      const gm = await prisma.groupMember.create({
+      const gm = await prisma.roomMember.create({
         data: {
-          groupId,
+          roomId,
           userId,
           role: "member"
         }
@@ -135,20 +135,20 @@ export const roomsResolvers = {
 
       const joinRoomMessage = await prisma.message.create({
         data: {
-          content: `${user.displayName} joined the group.`,
+          content: `${user.displayName} joined the room.`,
           senderId: userId,
-          groupId
+          roomId
         },
         include: {
-          sender: true, group: true,
+          sender: true, room: true,
         }
       });
 
       // @toodo extract to a function or singleton
       // @todo for system message create a user to display in FE without prefix, e.g.
-      // jay created group ✅
-      // jay: jay created group ❎
-      io.to(groupId).emit(SocketEvents.NEW_MESSAGE, {
+      // jay created room ✅
+      // jay: jay created room ❎
+      io.to(roomId).emit(SocketEvents.NEW_MESSAGE, {
         ...joinRoomMessage,
         createdAt: joinRoomMessage.createdAt.toISOString(),
       });

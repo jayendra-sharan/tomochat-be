@@ -7,7 +7,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
 
 export const authResolvers = {
   Query: {
-    me: async (_: any, _args: any, { userId, prisma}) => {
+    me: async (_: any, _args: any, { userId, prisma}: GraphQLContext) => {
       if (!userId) {
         throw new Error("User not authenticated");
       }
@@ -15,9 +15,9 @@ export const authResolvers = {
       const user = await prisma.user.findUnique({
         where: { id: userId },
         include: {
-          groups: {
+          rooms: {
             include: {
-              group: {
+              room: {
                 include: {
                   members: {
                     include: {
@@ -34,11 +34,11 @@ export const authResolvers = {
         throw new Error("User not found!");
       }
 
-      const groups = user.groups.map((gm) => gm.group);
+      const rooms = user.rooms.map((gm) => gm.room);
 
       return {
         ...user,
-        groups,
+        rooms,
       };
     },
     login: async (_, { input }, { prisma }) => {

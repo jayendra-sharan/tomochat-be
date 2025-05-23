@@ -6,13 +6,12 @@ import { Server, Socket } from "socket.io";
 
 export const handleReadMessage = async (io: Server, socket: Socket, payload: ReadMessagePayload) => {
   const { roomId, userId } = payload;
-  logger.info("Reading message in room", roomId);
   
   await prisma.messageStatus.updateMany({
     where: {
       userId,
       message: {
-        groupId: roomId,
+        roomId: roomId,
       },
       isRead: false,
     },

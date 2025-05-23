@@ -5,13 +5,13 @@ import { Suggestion } from "@/domains/shared/types";
 type CreateMessageDbType = {
   prisma: PrismaClient;
   user: User;
-  groupId: string;
+  roomId: string;
 }
 
 export function createMessageDb({
   prisma,
   user,
-  groupId,
+  roomId,
 }: CreateMessageDbType) {
   const { id, displayName } = user;
   return {
@@ -21,18 +21,18 @@ export function createMessageDb({
         data: {
           content,
           senderId: id,
-          groupId,
+          roomId,
           suggestion
         },
         include: {
           sender: true,
-          group: true,
+          room: true,
         }
       });
     },
-    updateGroupLastMessage: async (content: string) => {
-      const group = await prisma.group.update({
-        where: { id: groupId },
+    updateRoomLastMessage: async (content: string) => {
+      const room = await prisma.room.update({
+        where: { id: roomId },
         data: {
           lastMessage: `${displayName}: ${content}`,
         },
@@ -40,11 +40,11 @@ export function createMessageDb({
           name: true,
         }
       });
-      return group.name;
+      return room.name;
     },
     createMessageStatuses: async (messageId: string) => {
-      const members = await prisma.groupMember.findMany({
-        where: { groupId },
+      const members = await prisma.roomMember.findMany({
+        where: { roomId },
         select: { userId: true },
       });
 
