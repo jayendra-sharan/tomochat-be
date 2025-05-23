@@ -18,6 +18,19 @@ export const roomsResolvers = {
                 include: {
                   user: true,
                 }
+              },
+              messages: {
+                take: 1,
+                orderBy: { createdAt: "desc" },
+                include: {
+                  perUserStatus: {
+                    where: { userId },
+                    select: {
+                      isRead: true,
+                    }
+                  }
+                }
+
               }
             }
           }
@@ -29,7 +42,18 @@ export const roomsResolvers = {
         }
       });
 
-      return memberships.map(m => m.group);
+      
+      const groups = memberships.map(m => {
+        const group = m.group;
+        const lastMessage = group.messages?.[0];
+        const isUnread = lastMessage?.perUserStatus?.[0].isRead === false;
+        return {
+          ...group,
+          lastMessage: lastMessage.content,
+          isUnread,
+        }
+      });
+      return groups;
     }
   },
   Mutation: {

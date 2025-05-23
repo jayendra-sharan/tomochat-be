@@ -32,6 +32,16 @@ export const messageResolvers = {
         include: {
           sender: true,
           group: true,
+          perUserStatus: {
+            select: {
+              userId: true,
+              isRead: true,
+              isDeleted: true,
+              delivered: true,
+              readAt: true,
+              deletedAt: true,
+            },
+          },
         },
         orderBy: {
           createdAt: 'asc',

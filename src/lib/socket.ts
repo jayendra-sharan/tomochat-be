@@ -6,6 +6,7 @@ import { SocketEvents } from '@/constants/socketEvents';
 import { logger } from './logger';
 import { handleUserTyping } from '@/domains/chat/socket/userTyping';
 import { addUserSocket, removeUserSocket } from '@/domains/socket/socketRegistry';
+import { handleReadMessage } from '@/domains/chat/socket/readMessage';
 
 // @todo move it to new file
 interface AuthTokenPayload {
@@ -34,6 +35,7 @@ export function initSocket(io: Server) {
       // socket.on(SocketEvents.SEND_MESSAGE, (payload) => handleSendMessage(io, socket, payload));
       socket.on(SocketEvents.START_TYPING, (payload) =>  handleUserTyping(io, socket, payload, SocketEvents.START_TYPING));
       socket.on(SocketEvents.STOP_TYPING, (payload) => handleUserTyping(io, socket, payload, SocketEvents.STOP_TYPING));
+      socket.on(SocketEvents.READ_MESSAGE, (payload) => handleReadMessage(io, socket, payload))
     } catch (error) {
       logger.warn("Socket auth failed", error);
       socket.disconnect();

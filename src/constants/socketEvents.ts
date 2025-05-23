@@ -9,4 +9,6 @@ export enum SocketEvents {
   TYPING_STOPPED = 'typing_stopped',
   SEND_MESSAGE = 'send_message',
   IN_APP_NOTIFICATION = "in_app_notification",
+  READ_MESSAGE = 'message:read',
+  READ_MESSAGE_ACK = 'message:read:ack'
 }

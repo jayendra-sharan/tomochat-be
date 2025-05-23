@@ -5,6 +5,8 @@ async function initMessageStatus() {
     include: { group: { include: { members: true } } },
   });
   
+  console.log("Message count", messages.length);
+
   for (const message of messages) {
     const groupMembers = message.group.members;
   

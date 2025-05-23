@@ -1,19 +1,21 @@
-import { groqAi } from "@/services";
-import { sendUserNotification } from "@/domains/notification/service";
 import { SocketEvents } from "@/constants/socketEvents";
 import { getAiResponse } from "../utils/ai";
 import { createMessageDb } from "../db/message.db";
 import { logger } from "@/lib/logger";
-import { getUserSockets } from "@/domains/socket/socketRegistry";
 import { emitInAppNotification } from "@/domains/socket/socketService";
 
 export const sendMessageService = async ({ input, user, prisma, io }) => {
-  const { isPrivate, groupId, content } = input;
+  const { groupId, content } = input;
   const { id, displayName } = user;
-  let aiReply = "";
   
-  const lastMessage = isPrivate ? content : aiReply
-  const suggestion = isPrivate ? null : await getAiResponse(input.content);
+  let lastMessage = content
+  const aiResponse = await getAiResponse(input.content);
+  let suggestion = null;
+
+  if (aiResponse.issues.length) {
+    suggestion = aiResponse;
+    lastMessage = aiResponse.improved;
+  }
 
 
   const { message, membersId, name: roomName } = await prisma.$transaction(async (tx) => {
@@ -42,6 +44,7 @@ export const sendMessageService = async ({ input, user, prisma, io }) => {
           message: lastMessage,
           displayName,
           roomName,
+          roomId: groupId
         }
       });
     }

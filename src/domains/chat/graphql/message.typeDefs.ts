@@ -1,6 +1,11 @@
 import gql from "graphql-tag";
 
 export const messageTypeDefs = gql`
+  type MessageStatus {
+    isRead: Boolean!
+    userId: ID!
+  }
+
   type Message {
     id: ID!
     content: String!
@@ -8,6 +13,7 @@ export const messageTypeDefs = gql`
     group: Group!
     suggestion: Suggestion
     createdAt: String!
+    perUserStatus: [MessageStatus!]!
   }
   type GroupMessages {
     messages: [Message!]!

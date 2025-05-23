@@ -4,6 +4,7 @@ import { getUserSockets } from "./socketRegistry";
 import { logger } from "@/lib/logger";
 
 type InAppNotificationMessageData = {
+  roomId: string;
   roomName: string;
   displayName: string;
   message: string;

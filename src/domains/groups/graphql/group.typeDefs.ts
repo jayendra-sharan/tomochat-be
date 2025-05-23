@@ -20,6 +20,7 @@ export const groupTypeDefs = gql`
     createdAt: String
     updatedAt: String
     lastMessage: String
+    isUnread: Boolean
   }
 
   input CreateGroupInput {

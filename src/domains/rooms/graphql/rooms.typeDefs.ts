@@ -2,7 +2,6 @@
 import gql from "graphql-tag";
 
 export const roomsTypeDefs = gql`
-
   type Member {
     id: ID!
     user: User!
@@ -17,11 +16,12 @@ export const roomsTypeDefs = gql`
     groupType: String!
     topic: String!
     inviteLink: String!
-    members: [Member!]!
+    members: [GroupMember!]!
     adminUserIds: [ID!]!
     createdAt: String
     updatedAt: String
     lastMessage: String
+    isUnread: Boolean
   }
 
   input CreateRoomInput {
@@ -39,7 +39,7 @@ export const roomsTypeDefs = gql`
   }
 
   extend type Query {
-    rooms: [Group!]!
+    rooms: [Room!]!
   }
 
   extend type Mutation {
