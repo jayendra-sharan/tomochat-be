@@ -166,5 +166,23 @@ export const roomsResolvers = {
 
       return true;
     },
+    clearGroupMessages: async (_: any, { input }, { prisma }) => {
+      const { roomId } = input;
+      await prisma.messageStatus.deleteMany({
+        where: {
+          message: {
+            roomId,
+          },
+        },
+      });
+
+      await prisma.message.deleteMany({
+        where: {
+          roomId,
+        },
+      });
+
+      return true;
+    },
   }
 };

@@ -1,15 +1,7 @@
-import { groqAi } from "@/services"
-type AIResponse = {
-  issues: string[];
-  improved: string;
-  english: string;
-  aiReply: string;
-  original: string;
-}
-export const getAiResponse = async (message: string): Promise<AIResponse> => {
-  const response = await groqAi(message);
-  return {
-    original: message,
-    ...response
-  }
+import { claudeAi, groqAi } from "@/services"
+import { AiResponse, supportedLanguage } from "@/services/types";
+
+export const getAiResponse = async (message: string, languageCode: supportedLanguage): Promise<AiResponse> => {
+  const response = await claudeAi(message, languageCode);
+  return response;
 }

@@ -23,11 +23,10 @@ export const messageTypeDefs = gql`
   }
 
   type Suggestion {
+    isMessageOk: Boolean!
     original: String!
-    aiReply: String!
-    english: String!
-    improved: String
-    issues: [String!]!
+    fixedMessage: String
+    fixLogic: String
   }
 
   input RoomMessagesInput {

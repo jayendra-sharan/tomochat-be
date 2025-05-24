@@ -42,6 +42,10 @@ export const roomsTypeDefs = gql`
     roomId: String!
   }
 
+  input ClearGroupMessagesInput {
+    roomId: String!
+  }
+
   extend type Query {
     rooms: [Room!]!
   }
@@ -50,5 +54,6 @@ export const roomsTypeDefs = gql`
     createRoom(input: CreateRoomInput!): Room!
     joinRoom(input: JoinRoomInput!): JoinRoomResponse
     deleteGroup(input: DeleteGroupInput!): Boolean!
+    clearGroupMessages(input: ClearGroupMessagesInput!): Boolean!
   }
 `;

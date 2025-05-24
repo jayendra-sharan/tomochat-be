@@ -1,18 +1,14 @@
 // @todo export types
 // Use in FE: domains/shared/types/index.ts
 
+import { AiResponse } from "@/services/types";
+
 export type Sender = {
   id: string;
   displayName: string;
 };
 
-export type Suggestion = {
-  original: string;
-  aiReply: string;
-  english: string;
-  improved: string;
-  issues?: string[]
-}
+export type Suggestion = AiResponse
 
 export type Message = {
   id: string;
