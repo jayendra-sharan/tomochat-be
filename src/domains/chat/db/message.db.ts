@@ -30,11 +30,11 @@ export function createMessageDb({
         }
       });
     },
-    updateRoomLastMessage: async (content: string) => {
+    updateRoomLastMessage: async (lastMessage: string, isSystemMessage: boolean = false) => {
       const room = await prisma.room.update({
         where: { id: roomId },
         data: {
-          lastMessage: `${displayName}: ${content}`,
+          lastMessage: isSystemMessage ? lastMessage : `${displayName}: ${lastMessage}`,
         },
         select: {
           name: true,
@@ -54,7 +54,9 @@ export function createMessageDb({
         data: membersId.map((userId) => ({
           messageId,
           userId: userId,
-          delivered: userId === id
+          delivered: userId === id,
+          isRead: userId === id,
+          readAt: new Date()
         }))
       });
       return membersId;

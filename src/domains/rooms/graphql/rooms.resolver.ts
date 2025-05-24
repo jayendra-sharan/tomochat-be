@@ -1,4 +1,5 @@
 import { SocketEvents } from "@/constants/socketEvents";
+import { sendMessageService } from "@/domains/chat/services/message.service";
 import { logger } from "@/lib/logger";
 import crypto from "crypto";
 
@@ -42,14 +43,13 @@ export const roomsResolvers = {
         }
       });
 
-      
       const rooms = memberships.map(m => {
         const room = m.room;
         const lastMessage = room.messages?.[0];
-        const isUnread = lastMessage?.perUserStatus?.[0].isRead === false;
+        const isUnread = !lastMessage?.perUserStatus?.[0].isRead;
         return {
           ...room,
-          lastMessage: lastMessage.content,
+          lastMessage: lastMessage?.content ?? null,
           isUnread,
         }
       });
@@ -57,7 +57,7 @@ export const roomsResolvers = {
     }
   },
   Mutation: {
-    createRoom: async (_, { input }, { userId, prisma }) => {
+    createRoom: async (_, { input }, { userId, prisma, io }) => {
       if (!userId ) {
         return "user not authenticated";
       }
@@ -81,15 +81,20 @@ export const roomsResolvers = {
         include: { members: true },
       });
 
-      logger.info("Room", JSON.stringify(room));
       // no need to broadcast this message - @todo extract to function
-      await prisma.message.create({
-        data: {
-          content: `${userDisplayName} created ${room.name}.`,
-          senderId: userId,
+      await sendMessageService({
+        input: {
           roomId: room.id,
-        }
-      });
+          content: `${userDisplayName} created ${room.name}.`,
+        },
+        user: {
+          id: 'SYSTEM',
+          displayName: '',
+        },
+        prisma,
+        io,
+        isSystemMessage: true,
+      })
 
       return {
         ...room,
@@ -133,29 +138,33 @@ export const roomsResolvers = {
 
       const user = await prisma.user.findUnique({ where: { id: userId }});
 
-      const joinRoomMessage = await prisma.message.create({
-        data: {
-          content: `${user.displayName} joined the room.`,
-          senderId: userId,
-          roomId
+      await sendMessageService({
+        input: {
+          roomId,
+          content: `${user.displayName} joined the chat.`,
         },
-        include: {
-          sender: true, room: true,
-        }
-      });
+        user: {
+          id: 'SYSTEM',
+          displayName: '',
+        },
+        prisma,
+        io,
+        isSystemMessage: true,
+      })
 
-      // @toodo extract to a function or singleton
-      // @todo for system message create a user to display in FE without prefix, e.g.
-      // jay created room ✅
-      // jay: jay created room ❎
-      io.to(roomId).emit(SocketEvents.NEW_MESSAGE, {
-        ...joinRoomMessage,
-        createdAt: joinRoomMessage.createdAt.toISOString(),
-      });
 
       return {
         result: true,
       };
-    }
+    },
+    deleteGroup: async (_: any, { input }, { prisma }) => {
+      const { roomId } = input;
+
+      await prisma.room.delete({
+        where: { id: roomId },
+      });
+
+      return true;
+    },
   }
 };

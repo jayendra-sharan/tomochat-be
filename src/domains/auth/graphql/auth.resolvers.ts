@@ -1,9 +1,11 @@
 import { GraphQLContext } from "@/app/context";
 import { logger } from "@/lib/logger";
+import { requestEmailVerification } from "@/services/emailVerification";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { verifyEmailCode } from "../service/emailVerification";
+import { createJwt } from "@/lib/jwt";
 
-const JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
 
 export const authResolvers = {
   Query: {
@@ -47,7 +49,7 @@ export const authResolvers = {
         throw new Error("Invalid email address or password");
       }
       
-      const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: "1d" });
+      const token = createJwt(user.id);
       return { token, user };
     },
   },
@@ -65,5 +67,15 @@ export const authResolvers = {
         }
       });
     },
+    requestEmailVerification: async(_, { input }) => {
+      return requestEmailVerification(input.email)
+    },
+    verifyEmailCode: async (_, { input }, { prisma}) => {
+      return verifyEmailCode({
+        prisma,
+        code: input.code,
+        email: input.email,
+      });
+    }
   }
 }

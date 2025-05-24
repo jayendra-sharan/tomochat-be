@@ -9,6 +9,7 @@ export const authTypeDefs = gql`
     rooms: [Room!]!
     createdAt: String!
     updatedAt: String!
+    isEmailVerified: Boolean!
   }
 
   type Auth {
@@ -28,12 +29,23 @@ export const authTypeDefs = gql`
     password: String!
   }
 
+  input RequestEmailVerificationInput {
+    email: String!
+  }
+
   extend type Query {
     me: User!
     login(input: LoginInput!): Auth
   }
 
+  input VerifyEmailCodeInput {
+    email: String!
+    code: String!
+  }
+
   extend type Mutation {
     createUser(input: CreateUserInput!): User!
+    requestEmailVerification(input: RequestEmailVerificationInput!): Boolean!
+    verifyEmailCode(input: VerifyEmailCodeInput!): Auth!
   }
 `;

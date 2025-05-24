@@ -38,6 +38,10 @@ export const roomsTypeDefs = gql`
     result: Boolean
   }
 
+  input DeleteGroupInput {
+    roomId: String!
+  }
+
   extend type Query {
     rooms: [Room!]!
   }
@@ -45,5 +49,6 @@ export const roomsTypeDefs = gql`
   extend type Mutation {
     createRoom(input: CreateRoomInput!): Room!
     joinRoom(input: JoinRoomInput!): JoinRoomResponse
+    deleteGroup(input: DeleteGroupInput!): Boolean!
   }
 `;

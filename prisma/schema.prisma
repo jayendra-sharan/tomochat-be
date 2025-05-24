@@ -20,6 +20,8 @@ model User {
   updatedAt          DateTime            @updatedAt
   notificationTokens NotificationToken[]
   MessageStatus      MessageStatus[]
+  isEmailVerified    Boolean             @default(false)
+  VerificationCode   VerificationCode[]
 }
 
 model Room {
@@ -39,7 +41,7 @@ model RoomMember {
   id       String   @id @default(cuid())
   user     User     @relation(fields: [userId], references: [id])
   userId   String
-  room     Room     @relation(fields: [roomId], references: [id])
+  room     Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
   roomId   String
   role     String   @default("member") // "member" | "admin"
   joinedAt DateTime @default(now())
@@ -53,7 +55,7 @@ model Message {
   suggestion    Json?
   sender        User            @relation(fields: [senderId], references: [id])
   senderId      String
-  room          Room            @relation(fields: [roomId], references: [id])
+  room          Room            @relation(fields: [roomId], references: [id], onDelete: Cascade)
   roomId        String
   createdAt     DateTime        @default(now())
   perUserStatus MessageStatus[]
@@ -73,7 +75,7 @@ model NotificationToken {
 
 model MessageStatus {
   id        String  @id @default(cuid())
-  message   Message @relation(fields: [messageId], references: [id])
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
   messageId String
   user      User    @relation(fields: [userId], references: [id])
   userId    String
@@ -85,4 +87,14 @@ model MessageStatus {
   deletedAt DateTime?
 
   @@unique([messageId, userId])
+}
+
+model VerificationCode {
+  id        String   @id @default(cuid())
+  userId    String
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
 }
