@@ -1,8 +1,6 @@
 import { GraphQLContext } from "@/app/context";
-import { logger } from "@/lib/logger";
 import { requestEmailVerification } from "@/services/emailVerification";
 import bcryptjs from "bcryptjs";
-import jwt from "jsonwebtoken";
 import { verifyEmailCode } from "../service/emailVerification";
 import { createJwt } from "@/lib/jwt";
 
@@ -59,13 +57,17 @@ export const authResolvers = {
       if (existing) throw new Error("User already exist");
 
       const hashedPassword = await bcryptjs.hash(input.password, 10);
-      return prisma.user.create({
+      const user = await prisma.user.create({
         data: {
-          ...input,
+          email: input.email,
+          displayName: input.displayName,
           userType: input.userType || "human",
           password: hashedPassword
         }
       });
+
+      await requestEmailVerification(user.email)
+      return user;
     },
     requestEmailVerification: async(_, { input }) => {
       return requestEmailVerification(input.email)

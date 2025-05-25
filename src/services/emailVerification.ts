@@ -15,12 +15,23 @@ export async function requestEmailVerification(email: string) {
     data: { userId: user.id, code, expiresAt },
   });
 
-  await resend.emails.send({
-    from: "no-reply@tomochat.xyz",
+  const html = `
+    <p>Hoi ${user.displayName}! 👋</p>
+    <p>Welcome to TomoChat 🎉</p>
+    <p>To complete your registration, use the verification code below:</p>
+    <h2 style="font-size: 24px; letter-spacing: 2px;">${code}</h2>
+    <p>This code will expire in 10 minutes.</p>
+    <p>If you didn't request this, you can safely ignore this email.</p>
+  `
+
+  const emailPayload = {
+    from: `TomoChat <${process.env.FROM_EMAIL}>`,
     to: email,
-    subject: "Your Verification Code",
-    text: `Your verification code is ${code}`,
-  });
+    subject: "Welcome to TomoChat",
+    html,
+  };
+  console.log("Sending email", emailPayload)
+  await resend.emails.send(emailPayload);
 
   return true;
 }
