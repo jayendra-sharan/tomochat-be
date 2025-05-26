@@ -1,6 +1,6 @@
 import { logger } from "@/lib/logger";
 import { joinRoomDb } from "../db/joinRoom.db";
-import { User } from "@prisma/client";
+import { User } from "@/generated/prisma/client";
 import { PrismaClient } from "@/lib/prisma";
 import { Server } from "socket.io";
 
