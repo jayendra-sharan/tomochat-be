@@ -1,10 +1,9 @@
-import { PrismaClient } from "@/lib/prisma";
-import { User } from "@/generated/prisma/client";
+import { DbTx } from "@/lib/prisma";
 import { Suggestion } from "@/domains/shared/types";
 
 type CreateMessageDbType = {
-  prisma: PrismaClient;
-  user: User;
+  prisma: DbTx;
+  user: {id: string; displayName: string};
   roomId: string;
 }
 
@@ -16,50 +15,61 @@ export function createMessageDb({
   const { id, displayName } = user;
   return {
     createMessage: async (content: string, suggestion?: Suggestion) => {
-
-      return prisma.message.create({
-        data: {
-          content,
-          senderId: id,
-          roomId,
-          suggestion
-        },
-        include: {
-          sender: true,
-          room: true,
-        }
-      });
+      try {
+        return prisma.message.create({
+          data: {
+            content,
+            senderId: id,
+            roomId,
+            suggestion
+          },
+          include: {
+            sender: true,
+            room: true,
+          }
+        });
+      } catch (error) {
+        throw new Error(`Error in message.db.ts:createMessage: ${error.message}`)
+      }
     },
     updateRoomLastMessage: async (lastMessage: string, isSystemMessage: boolean = false) => {
-      const room = await prisma.room.update({
-        where: { id: roomId },
-        data: {
-          lastMessage: isSystemMessage ? lastMessage : `${displayName}: ${lastMessage}`,
-        },
-        select: {
-          name: true,
-        }
-      });
-      return room.name;
+      try {
+        const room = await prisma.room.update({
+          where: { id: roomId },
+          data: {
+            lastMessage: isSystemMessage ? lastMessage : `${displayName}: ${lastMessage}`,
+          },
+          select: {
+            name: true,
+          }
+        });
+        return room.name;
+      } catch (error) {
+        throw new Error(`Error in message.db.ts:updateRoomLastMessage: ${error.message}`)
+      }
     },
     createMessageStatuses: async (messageId: string) => {
-      const members = await prisma.roomMember.findMany({
-        where: { roomId },
-        select: { userId: true },
-      });
-
-      const membersId = members.map((m) => m.userId);
-
-      await prisma.messageStatus.createMany({
-        data: membersId.map((userId) => ({
-          messageId,
-          userId: userId,
-          delivered: userId === id,
-          isRead: userId === id,
-          readAt: new Date()
-        }))
-      });
-      return membersId;
+      try {
+        const members = await prisma.roomMember.findMany({
+          where: { roomId },
+          select: { userId: true },
+        });
+  
+        const membersId = members.map((m) => m.userId);
+  
+        await prisma.messageStatus.createMany({
+          data: membersId.map((userId) => ({
+            messageId,
+            userId: userId,
+            delivered: userId === id,
+            isRead: userId === id,
+            readAt: new Date()
+          }))
+        });
+        return membersId;
+      } catch (error) {
+        throw new Error(`Error in message.db.ts:createMessageStatuses: ${error.message}`)
+      }
     }
   }
 }

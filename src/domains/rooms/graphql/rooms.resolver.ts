@@ -1,7 +1,6 @@
-import { SocketEvents } from "@/constants/socketEvents";
 import { sendMessageService } from "@/domains/chat/services/message.service";
-import { logger } from "@/lib/logger";
 import crypto from "crypto";
+import { joinRoomService } from "../services/joinRoom.service";
 
 export const roomsResolvers = {
   Query: {
@@ -101,61 +100,9 @@ export const roomsResolvers = {
         inviteLink:  `${room.id}--${inviteLink}`,
       }
     },
-    joinRoom: async (_, { input }, { userId, prisma, io }) => {
-      if (!userId) {
-        return "User not authenticated";
-      }
-
-      // @todo purpose of inviteId - maybe check expiry
-      const [roomId] = input.inviteLink.split("--");
-      logger.debug("Input", input);
-      const existing = await prisma.roomMember.findFirst({
-        where: {
-          roomId,
-          userId,
-        }
-      });
-
-      logger.debug("Exisiting", {existing, roomId, userId});
-
-      if (existing) {
-        const room = prisma.room.findUnique({
-          where: {
-            roomId
-          }
-        });
-        // @todos fix return type
-        return room;
-      }
-      
-      const gm = await prisma.roomMember.create({
-        data: {
-          roomId,
-          userId,
-          role: "member"
-        }
-      });
-
-      const user = await prisma.user.findUnique({ where: { id: userId }});
-
-      await sendMessageService({
-        input: {
-          roomId,
-          content: `${user.displayName} joined the chat.`,
-        },
-        user: {
-          id: 'SYSTEM',
-          displayName: '',
-        },
-        prisma,
-        io,
-        isSystemMessage: true,
-      })
-
-
-      return {
-        result: true,
-      };
+    joinRoom: async (_, { input }, { user, prisma, io }) => {
+      console.log("join room", input)
+      return joinRoomService({ input, user, prisma, io})
     },
     deleteGroup: async (_: any, { input }, { prisma }) => {
       const { roomId } = input;

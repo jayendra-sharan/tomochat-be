@@ -22,6 +22,9 @@ model User {
   MessageStatus      MessageStatus[]
   isEmailVerified    Boolean             @default(false)
   VerificationCode   VerificationCode[]
+
+  connectionsA UserConnection[] @relation("ConnectionA")
+  connectionsB UserConnection[] @relation("ConnectionB")
 }
 
 model Room {
@@ -97,4 +100,15 @@ model VerificationCode {
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
+}
+
+model UserConnection {
+  id        String   @id @default(cuid())
+  userA     User     @relation("ConnectionA", fields: [userAId], references: [id])
+  userAId   String
+  userB     User     @relation("ConnectionB", fields: [userBId], references: [id])
+  userBId   String
+  createdAt DateTime @default(now())
+
+  @@unique([userAId, userBId])
 }

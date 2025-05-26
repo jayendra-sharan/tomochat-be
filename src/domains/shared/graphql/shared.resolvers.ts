@@ -6,5 +6,8 @@ export const sharedResolvers = {
   },
   Message: {
     createdAt: (parent) => parent.createdAt.toISOString(),
+  },
+  UserConnection: {
+    createdAt: (parent) => parent.createdAt.toISOString(),
   }
 }

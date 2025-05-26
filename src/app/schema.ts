@@ -13,6 +13,8 @@ import { roomsResolvers } from "@/domains/rooms/graphql/rooms.resolver";
 import { notificationTypeDefs } from "@/domains/notification/graphql/typeDefs";
 import { notificationResolvers } from "@/domains/notification/graphql/resolver";
 import { makeExecutableSchema } from "@graphql-tools/schema";
+import { userTypeDefs } from "@/domains/user/graphql/user.typeDefs";
+import { userResolvers } from "@/domains/user/graphql/user.resolvers";
 
 export const schema = makeExecutableSchema<GraphQLContext>({
   typeDefs: mergeTypeDefs([
@@ -21,12 +23,14 @@ export const schema = makeExecutableSchema<GraphQLContext>({
     authTypeDefs,
     messageTypeDefs,
     notificationTypeDefs,
+    userTypeDefs,
   ]),
   resolvers: mergeResolvers([
     authResolvers,
     roomsResolvers,
     messageResolvers,
     notificationResolvers,
+    userResolvers,
     sharedResolvers,
   ])
 });

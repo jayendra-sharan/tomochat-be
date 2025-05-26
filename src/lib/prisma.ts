@@ -1,6 +1,7 @@
-import { PrismaClient as GeneratedPrismaClient } from '@/generated/prisma/client';
+import { PrismaClient as GeneratedPrismaClient, Prisma } from '@/generated/prisma/client';
 
 export const prisma = new GeneratedPrismaClient();
 
-// Export type alias so everyone uses the same source
-export type PrismaClient = GeneratedPrismaClient;
+// Export instance type, not constructor type
+export type PrismaClient = InstanceType<typeof GeneratedPrismaClient>;
+export type DbTx = Prisma.TransactionClient;

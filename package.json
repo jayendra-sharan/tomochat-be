@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "NODE_ENV=development ts-node-dev --respawn --transpile-only --require tsconfig-paths/register src/index.ts",
     "build:dev": "tsc",
-    "build:prod": "npm run clean && npm ci && npx ts-patch install && tsc --noEmitOnError false && prisma generate",
+    "build:prod": "npm run clean && npm ci && npx ts-patch install && tsc --noEmitOnError false && prisma migrate reset --force --skip-seed && prisma generate",
     "start": "node dist/index.js",
     "clean": "rm -rf dist"
   },
