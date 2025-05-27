@@ -57,7 +57,7 @@ export const roomsResolvers = {
         displayName = displayName ? `${displayName}: ` : '';
         return {
           ...room,
-          lastMessage: `${displayName}${lastMessage?.content}` ?? null,
+          lastMessage: `${displayName}${lastMessage?.content}`,
           isUnread,
         }
       });
