@@ -1,6 +1,7 @@
 import { sendMessageService } from "@/domains/chat/services/message.service";
 import crypto from "crypto";
 import { joinRoomService } from "../services/joinRoom.service";
+import { getRoomDetailsService } from "../services/getRoomDetails.service";
 
 export const roomsResolvers = {
   Query: {
@@ -23,6 +24,7 @@ export const roomsResolvers = {
                 take: 1,
                 orderBy: { createdAt: "desc" },
                 include: {
+                  sender: true,
                   perUserStatus: {
                     where: { userId },
                     select: {
@@ -43,16 +45,27 @@ export const roomsResolvers = {
       });
 
       const rooms = memberships.map(m => {
+        // @todo refactor
         const room = m.room;
         const lastMessage = room.messages?.[0];
         const isUnread = !lastMessage?.perUserStatus?.[0].isRead;
+        const lastMessageSender = lastMessage?.sender;
+        let displayName = lastMessageSender?.id === userId ? "You" : (
+          lastMessageSender?.id === "SYSTEM" ? "" : lastMessageSender?.displayName
+        );
+
+        displayName = displayName ? `${displayName}: ` : '';
         return {
           ...room,
-          lastMessage: lastMessage?.content ?? null,
+          lastMessage: `${displayName}${lastMessage?.content}` ?? null,
           isUnread,
         }
       });
       return rooms;
+    },
+    getRoomDetails: async(_: any, { input }, { userId, prisma }) => {
+      const { roomId } = input;
+      return getRoomDetailsService({ roomId, userId, prisma});
     }
   },
   Mutation: {

@@ -22,6 +22,7 @@ export const roomsTypeDefs = gql`
     updatedAt: String
     lastMessage: String
     isUnread: Boolean
+    messageCount: Int
   }
 
   input CreateRoomInput {
@@ -46,7 +47,12 @@ export const roomsTypeDefs = gql`
     roomId: String!
   }
 
+  input GetRoomDetailsInput {
+    roomId: String!
+  }
+
   extend type Query {
+    getRoomDetails(input: GetRoomDetailsInput): Room!
     rooms: [Room!]!
   }
 
