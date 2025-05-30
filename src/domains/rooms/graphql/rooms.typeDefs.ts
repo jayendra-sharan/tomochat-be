@@ -15,6 +15,7 @@ export const roomsTypeDefs = gql`
     name: String!
     roomType: String!
     topic: String!
+    description: String
     inviteLink: String!
     members: [RoomMember!]!
     adminUserIds: [ID!]!
@@ -29,6 +30,7 @@ export const roomsTypeDefs = gql`
     name: String!
     language: String
     userDisplayName: String
+    description: String
   }
 
   input JoinRoomInput {
@@ -51,6 +53,11 @@ export const roomsTypeDefs = gql`
     roomId: String!
   }
 
+  input AddMembersToRoomInput {
+    roomId: String!
+    memberIds: [String!]!
+  }
+
   extend type Query {
     getRoomDetails(input: GetRoomDetailsInput): Room!
     rooms: [Room!]!
@@ -61,5 +68,6 @@ export const roomsTypeDefs = gql`
     joinRoom(input: JoinRoomInput!): JoinRoomResponse
     deleteGroup(input: DeleteGroupInput!): Boolean!
     clearGroupMessages(input: ClearGroupMessagesInput!): Boolean!
+    addMembersToRoom(input: AddMembersToRoomInput!): Room!
   }
 `;

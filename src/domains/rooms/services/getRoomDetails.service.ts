@@ -1,12 +1,17 @@
-import { PrismaClient } from "@/lib/prisma"
+import { PrismaClient } from "@/lib/prisma";
+import { GraphQLResolveInfo } from "graphql";
+import { fetchRoomDetails } from "../db/fetchRoom.db";
 
 type GetRoomDetailsService = {
   prisma: PrismaClient;
   roomId: string;
-  userId: string;
-}
+};
 
-export const getRoomDetailsService = async ({ prisma, roomId, userId }: GetRoomDetailsService) => {
+export const getRoomDetailsService = async ({
+  prisma,
+  roomId,
+}: GetRoomDetailsService) => {
+  // const room = fetchRoomDetails({ id: roomId, prisma, info });
   const room = await prisma.room.findUnique({
     where: { id: roomId },
     include: {
@@ -16,11 +21,11 @@ export const getRoomDetailsService = async ({ prisma, roomId, userId }: GetRoomD
         },
       },
       messages: true,
-    }
+    },
   });
 
   if (!room) {
     throw new Error("Room not found");
   }
   return room;
-}
+};
