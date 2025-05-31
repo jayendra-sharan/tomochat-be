@@ -77,6 +77,8 @@ Each message is evaluated in two steps:
 
 🧾 OUTPUT FORMAT
 
+Always stick to the following format. Do not add any extra information.
+
 If the message is OK:
 ---------------------
 {

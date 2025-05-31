@@ -1,4 +1,4 @@
-import { gql } from 'graphql-tag';
+import { gql } from "graphql-tag";
 
 export const authTypeDefs = gql`
   type User {
@@ -43,9 +43,26 @@ export const authTypeDefs = gql`
     code: String!
   }
 
+  input ChangePasswordInput {
+    currentPassword: String!
+    newPassword: String!
+  }
+
+  input RequestPasswordResetInput {
+    email: String!
+  }
+
+  input RecoverPasswordInput {
+    password: String
+    token: String
+  }
+
   extend type Mutation {
     createUser(input: CreateUserInput!): User!
     requestEmailVerification(input: RequestEmailVerificationInput!): Boolean!
     verifyEmailCode(input: VerifyEmailCodeInput!): Auth!
+    changePassword(input: ChangePasswordInput!): Boolean!
+    requestPasswordReset(input: RequestPasswordResetInput!): Boolean!
+    recoverPassword(input: RecoverPasswordInput!): Boolean!
   }
 `;

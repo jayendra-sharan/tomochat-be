@@ -25,6 +25,20 @@ model User {
 
   connectionsA UserConnection[] @relation("ConnectionA")
   connectionsB UserConnection[] @relation("ConnectionB")
+
+  profile            UserProfile?
+  PasswordResetToken PasswordResetToken[]
+}
+
+model UserProfile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  fullName  String?
+  location  String?
+  avatarUrl String?
+  bio       String?
 }
 
 model Room {
@@ -112,4 +126,14 @@ model UserConnection {
   createdAt DateTime @default(now())
 
   @@unique([userAId, userBId])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  purpose String @default("PASSWORD_RESET")
 }
