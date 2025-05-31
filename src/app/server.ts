@@ -45,6 +45,7 @@ app.get("/run-migrations", async (req, res) => {
 });
 
 if (process.env.NODE_ENV === "production") {
+  logger.info("Initializing Sentry");
   Sentry.setupExpressErrorHandler(app);
 }
 
