@@ -1,4 +1,4 @@
-require("../services/instrument.js");
+require("../services/instrument");
 
 import express from "express";
 import { createYoga } from "graphql-yoga";
