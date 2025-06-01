@@ -2,10 +2,13 @@ import { PrismaClient } from "@/lib/prisma";
 
 type GetUserConnections = {
   userId: string;
-  prisma: PrismaClient
-}
+  prisma: PrismaClient;
+};
 
-export const getUserConnections = async ({ userId, prisma }: GetUserConnections) => {
+export const getUserConnections = async ({
+  userId,
+  prisma,
+}: GetUserConnections) => {
   const connections = await prisma.userConnection.findMany({
     where: {
       userAId: userId,
@@ -15,7 +18,7 @@ export const getUserConnections = async ({ userId, prisma }: GetUserConnections)
         select: {
           id: true,
           displayName: true,
-          email: true,
+          createdAt: true,
         },
       },
     },

@@ -20,7 +20,7 @@ export const userTypeDefs = gql`
   type UserContact {
     id: ID!
     displayName: String!
-    email: String!
+    createdAt: String
   }
 
   input CreateUserProfileInput {
