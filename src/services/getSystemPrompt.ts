@@ -1,6 +1,6 @@
-import { basePrompt } from "./basePrompt"
-import { getSample } from "./samples"
-import { supportedLanguage } from "./types"
+import { basePrompt } from "./basePrompt";
+import { getSample } from "./samples";
+import { supportedLanguage } from "./types";
 
 const languageMap: Record<supportedLanguage, string> = {
   "nl-NL": "Dutch",
@@ -11,11 +11,18 @@ const languageMap: Record<supportedLanguage, string> = {
   "fa-IR": "Farsi",
   "it-IT": "Italian",
   "fr-FR": "French",
-  "de-DE": "Deutsch"
-}
+  "de-DE": "Deutsch",
+  "pl-PL": "Polish",
+  "ro-RO": "Romanian",
+  "pt-PT": "Portuguese",
+};
 
-
+const defaultLanguage = process.env.DEFAULT_LANGUAGE || "English";
 export const getSystemPrompt = (languageCode: supportedLanguage) => {
   const regex = /{{TARGET_LANGUAGE}}/g;
-  return basePrompt.replace(regex, languageMap[languageCode]).replace("{{TARGET_LANGUAGE_SAMPLES}}", getSample(languageCode))
-}
+  const nativeLanguage = /{{NATIVE_LANGUAGE}}/g;
+  return basePrompt
+    .replace(regex, languageMap[languageCode])
+    .replace(nativeLanguage, defaultLanguage)
+    .replace("{{TARGET_LANGUAGE_SAMPLES}}", getSample(languageCode));
+};

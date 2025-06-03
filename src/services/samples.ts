@@ -1,244 +1,309 @@
 import { AiResponse, supportedLanguage } from "./types";
 
 const samples: Partial<Record<supportedLanguage, AiResponse[]>> = {
-  "nl-NL":[
+  "nl-NL": [
     {
-      "isMessageOk": true,
-      "original": "Ik denk dat ik straks naar huis ga.",
-      "fixedMessage": "",
-      "fixLogic": ""
+      isMessageOk: true,
+      original: "Ik denk dat ik straks naar huis ga.",
+      fixedMessage: "",
+      fixLogic: "",
+      translated: "",
     },
     {
-      "isMessageOk": false,
-      "original": "I guess I’ll go there later.",
-      "fixedMessage": "Ik denk dat ik daar later naartoe ga.",
-      "fixLogic": "translated to Dutch"
+      isMessageOk: false,
+      original: "I guess I go later.",
+      fixedMessage: "Ik denk dat ik later ga.",
+      fixLogic: "translated to Dutch",
+      translated: "I guess I go later.",
     },
     {
-      "isMessageOk": false,
-      "original": "Ik weet niet what to say now.",
-      "fixedMessage": "Ik weet niet wat ik nu moet zeggen.",
-      "fixLogic": "translated English part and adjusted fluency"
+      isMessageOk: false,
+      original: "Ik heb eten gisteren.",
+      fixedMessage: "Ik heb gisteren gegeten.",
+      fixLogic: "corrected verb and word order",
+      translated: "I ate yesterday.",
     },
     {
-      "isMessageOk": false,
-      "original": "Ik heb een appel gegeten gisteren.",
-      "fixedMessage": "Ik heb gisteren een appel gegeten.",
-      "fixLogic": "word order correction"
-    }
-  ],
-  "es-ES": [
-    {
-      "isMessageOk": true,
-      "original": "Voy a salir con mis amigos esta noche.",
-      "fixedMessage": "",
-      "fixLogic": ""
+      isMessageOk: false,
+      original: "Ik wil go naar het park.",
+      fixedMessage: "Ik wil naar het park gaan.",
+      fixLogic: "translated verb 'go'",
+      translated: "I want to go to the park.",
     },
-    {
-      "isMessageOk": false,
-      "original": "I think it’s going to rain soon.",
-      "fixedMessage": "Creo que va a llover pronto.",
-      "fixLogic": "translated to Spanish"
-    },
-    {
-      "isMessageOk": false,
-      "original": "Mañana I will visit mis abuelos.",
-      "fixedMessage": "Mañana visitaré a mis abuelos.",
-      "fixLogic": "translated English segment and corrected verb and preposition"
-    },
-    {
-      "isMessageOk": false,
-      "original": "Yo está muy feliz hoy.",
-      "fixedMessage": "Yo estoy muy feliz hoy.",
-      "fixLogic": "verb agreement correction"
-    }
-  ],
-  "uk-UA": [
-    {
-      "isMessageOk": true,
-      "original": "Мені сьогодні дуже сподобалося.",
-      "fixedMessage": "",
-      "fixLogic": ""
-    },
-    {
-      "isMessageOk": false,
-      "original": "I think I’ll go to the market later.",
-      "fixedMessage": "Я думаю, що пізніше піду на ринок.",
-      "fixLogic": "translated to Ukrainian"
-    },
-    {
-      "isMessageOk": false,
-      "original": "Я хочу buy some хліб.",
-      "fixedMessage": "Я хочу купити трохи хліба.",
-      "fixLogic": "translated English part and improved word order"
-    },
-    {
-      "isMessageOk": false,
-      "original": "Мені подобається цей погода.",
-      "fixedMessage": "Мені подобається ця погода.",
-      "fixLogic": "corrected gender of article"
-    }
-  ],
-  "el-GR": [
-    {
-      "isMessageOk": true,
-      "original": "Είναι πολύ ωραία μέρα σήμερα.",
-      "fixedMessage": "",
-      "fixLogic": ""
-    },
-    {
-      "isMessageOk": false,
-      "original": "I believe it’s going to be a nice day.",
-      "fixedMessage": "Πιστεύω ότι θα είναι μια όμορφη μέρα.",
-      "fixLogic": "translated to Greek"
-    },
-    {
-      "isMessageOk": false,
-      "original": "Θα go στο σπίτι μετά.",
-      "fixedMessage": "Θα πάω στο σπίτι μετά.",
-      "fixLogic": "translated verb 'go'"
-    },
-    {
-      "isMessageOk": false,
-      "original": "Εγώ είναι πολύ κουρασμένος.",
-      "fixedMessage": "Εγώ είμαι πολύ κουρασμένος.",
-      "fixLogic": "corrected verb form"
-    }
-  ],
-  "hi-IN": [
-    {
-      "isMessageOk": true,
-      "original": "मैं थोड़ी देर में आऊँगा।",
-      "fixedMessage": "",
-      "fixLogic": ""
-    },
-    {
-      "isMessageOk": false,
-      "original": "I guess I’ll meet him tomorrow.",
-      "fixedMessage": "मुझे लगता है कि मैं कल उससे मिलूंगा।",
-      "fixLogic": "translated to Hindi"
-    },
-    {
-      "isMessageOk": false,
-      "original": "मैं think यह सही नहीं है।",
-      "fixedMessage": "मुझे लगता है कि यह सही नहीं है।",
-      "fixLogic": "translated 'think' and simplified phrasing"
-    },
-    {
-      "isMessageOk": false,
-      "original": "मैं कल बाजार जाता हूँ।",
-      "fixedMessage": "मैं कल बाजार जाऊँगा।",
-      "fixLogic": "corrected tense"
-    }
-  ],
-  "fa-IR": [
-    {
-      "isMessageOk": true,
-      "original": "من امروز وقت آزاد دارم.",
-      "fixedMessage": "",
-      "fixLogic": ""
-    },
-    {
-      "isMessageOk": false,
-      "original": "I think I’ll stay home today.",
-      "fixedMessage": "فکر می‌کنم امروز در خانه بمانم.",
-      "fixLogic": "translated to Farsi"
-    },
-    {
-      "isMessageOk": false,
-      "original": "من می‌خواهم to rest a little.",
-      "fixedMessage": "من می‌خواهم کمی استراحت کنم.",
-      "fixLogic": "translated English part"
-    },
-    {
-      "isMessageOk": false,
-      "original": "من خیلی خسته هستم الان.",
-      "fixedMessage": "من الان خیلی خسته‌ام.",
-      "fixLogic": "corrected verb structure"
-    }
-  ],
-  "it-IT": [
-    {
-      "isMessageOk": true,
-      "original": "Vado a prendere un caffè.",
-      "fixedMessage": "",
-      "fixLogic": ""
-    },
-    {
-      "isMessageOk": false,
-      "original": "I guess I’ll see her at the party.",
-      "fixedMessage": "Credo che la vedrò alla festa.",
-      "fixLogic": "translated to Italian"
-    },
-    {
-      "isMessageOk": false,
-      "original": "Domenica I will go al mare.",
-      "fixedMessage": "Domenica andrò al mare.",
-      "fixLogic": "translated English part and verb"
-    },
-    {
-      "isMessageOk": false,
-      "original": "Io essere molto felice oggi.",
-      "fixedMessage": "Io sono molto felice oggi.",
-      "fixLogic": "corrected verb 'essere' to 'sono'"
-    }
   ],
   "fr-FR": [
     {
-      "isMessageOk": true,
-      "original": "Je vais faire les courses.",
-      "fixedMessage": "",
-      "fixLogic": ""
+      isMessageOk: true,
+      original: "Je vais faire les courses maintenant.",
+      fixedMessage: "",
+      fixLogic: "",
+      translated: "",
     },
     {
-      "isMessageOk": false,
-      "original": "I guess I’ll eat something now.",
-      "fixedMessage": "Je suppose que je vais manger quelque chose maintenant.",
-      "fixLogic": "translated to French"
+      isMessageOk: false,
+      original: "I believe it's fine.",
+      fixedMessage: "Je crois que c'est bon.",
+      fixLogic: "translated to French",
+      translated: "I believe it's fine.",
     },
     {
-      "isMessageOk": false,
-      "original": "Je suis tired aujourd’hui.",
-      "fixedMessage": "Je suis fatigué aujourd’hui.",
-      "fixLogic": "translated 'tired'"
+      isMessageOk: false,
+      original: "Je suis tired aujourd’hui.",
+      fixedMessage: "Je suis fatigué aujourd’hui.",
+      fixLogic: "translated 'tired'",
+      translated: "I am tired today.",
     },
     {
-      "isMessageOk": false,
-      "original": "Demain je vais aller le parc avec amis.",
-      "fixedMessage": "Demain, je vais aller au parc avec des amis.",
-      "fixLogic": "fixed article and preposition usage"
-    }
+      isMessageOk: false,
+      original: "Demain je aller la plage.",
+      fixedMessage: "Demain, je vais à la plage.",
+      fixLogic: "fixed verb and preposition",
+      translated: "Tomorrow I go to the beach.",
+    },
   ],
   "de-DE": [
     {
-      "isMessageOk": true,
-      "original": "Ich bin gerade nach Hause gekommen.",
-      "fixedMessage": "",
-      "fixLogic": ""
+      isMessageOk: true,
+      original: "Ich bin heute sehr müde.",
+      fixedMessage: "",
+      fixLogic: "",
+      translated: "",
     },
     {
-      "isMessageOk": false,
-      "original": "I think I’ll call him later.",
-      "fixedMessage": "Ich glaube, ich rufe ihn später an.",
-      "fixLogic": "translated to German"
+      isMessageOk: false,
+      original: "I think I go home now.",
+      fixedMessage: "Ich denke, ich gehe jetzt nach Hause.",
+      fixLogic: "translated to German",
+      translated: "I think I go home now.",
     },
     {
-      "isMessageOk": false,
-      "original": "Ich glaube I forgot mein Schlüssel.",
-      "fixedMessage": "Ich glaube, ich habe meinen Schlüssel vergessen.",
-      "fixLogic": "translated English part and corrected article"
+      isMessageOk: false,
+      original: "Ich bin happy heute.",
+      fixedMessage: "Ich bin heute glücklich.",
+      fixLogic: "translated 'happy' and word order",
+      translated: "I am happy today.",
     },
     {
-      "isMessageOk": false,
-      "original": "Ich bin sehr müde heute ich schlafen früh.",
-      "fixedMessage": "Ich bin heute sehr müde, ich werde früh schlafen gehen.",
-      "fixLogic": "added verb phrase and fixed punctuation"
-    }
-  ]
-}
-
+      isMessageOk: false,
+      original: "Ich habe gegessen ein Apfel.",
+      fixedMessage: "Ich habe einen Apfel gegessen.",
+      fixLogic: "corrected word order and article",
+      translated: "I ate an apple.",
+    },
+  ],
+  "es-ES": [
+    {
+      isMessageOk: true,
+      original: "Voy a salir con mis amigos.",
+      fixedMessage: "",
+      fixLogic: "",
+      translated: "",
+    },
+    {
+      isMessageOk: false,
+      original: "I think it's going to rain.",
+      fixedMessage: "Creo que va a llover.",
+      fixLogic: "translated to Spanish",
+      translated: "I think it's going to rain.",
+    },
+    {
+      isMessageOk: false,
+      original: "Yo está muy feliz.",
+      fixedMessage: "Yo estoy muy feliz.",
+      fixLogic: "corrected verb form",
+      translated: "I am very happy.",
+    },
+    {
+      isMessageOk: false,
+      original: "Mañana I will go al parque.",
+      fixedMessage: "Mañana iré al parque.",
+      fixLogic: "translated English part",
+      translated: "Tomorrow I will go to the park.",
+    },
+  ],
+  "it-IT": [
+    {
+      isMessageOk: true,
+      original: "Vado a prendere un caffè.",
+      fixedMessage: "",
+      fixLogic: "",
+      translated: "",
+    },
+    {
+      isMessageOk: false,
+      original: "I guess I'll see her.",
+      fixedMessage: "Penso che la vedrò.",
+      fixLogic: "translated to Italian",
+      translated: "I guess I'll see her.",
+    },
+    {
+      isMessageOk: false,
+      original: "Io essere stanco oggi.",
+      fixedMessage: "Io sono stanco oggi.",
+      fixLogic: "corrected verb 'essere'",
+      translated: "I am tired today.",
+    },
+    {
+      isMessageOk: false,
+      original: "Domani I go al mare.",
+      fixedMessage: "Domani vado al mare.",
+      fixLogic: "translated verb and fixed article",
+      translated: "Tomorrow I go to the sea.",
+    },
+  ],
+  "el-GR": [
+    {
+      isMessageOk: true,
+      original: "Είναι πολύ ωραία μέρα σήμερα.",
+      fixedMessage: "",
+      fixLogic: "",
+      translated: "",
+    },
+    {
+      isMessageOk: false,
+      original: "I believe it’s going to be a nice day.",
+      fixedMessage: "Πιστεύω ότι θα είναι μια όμορφη μέρα.",
+      fixLogic: "translated to Greek",
+      translated: "I believe it’s going to be a nice day.",
+    },
+    {
+      isMessageOk: false,
+      original: "Θα go στο σπίτι μετά.",
+      fixedMessage: "Θα πάω στο σπίτι μετά.",
+      fixLogic: "translated verb 'go'",
+      translated: "I will go home later.",
+    },
+    {
+      isMessageOk: false,
+      original: "Εγώ είναι πολύ κουρασμένος.",
+      fixedMessage: "Εγώ είμαι πολύ κουρασμένος.",
+      fixLogic: "corrected verb form",
+      translated: "I am very tired.",
+    },
+  ],
+  "pl-PL": [
+    {
+      isMessageOk: true,
+      original: "Dzisiaj jest naprawdę zimno.",
+      fixedMessage: "",
+      fixLogic: "",
+      translated: "",
+    },
+    {
+      isMessageOk: false,
+      original: "I want to buy chleb.",
+      fixedMessage: "Chcę kupić chleb.",
+      fixLogic: "translated English part",
+      translated: "I want to buy bread.",
+    },
+    {
+      isMessageOk: false,
+      original: "Ja być zmęczony.",
+      fixedMessage: "Jestem zmęczony.",
+      fixLogic: "corrected verb structure",
+      translated: "I am tired.",
+    },
+    {
+      isMessageOk: false,
+      original: "Idę do sklep tomorrow.",
+      fixedMessage: "Jutro idę do sklepu.",
+      fixLogic: "translated and reordered",
+      translated: "Tomorrow I go to the store.",
+    },
+  ],
+  "ro-RO": [
+    {
+      isMessageOk: true,
+      original: "Mă duc la cumpărături acum.",
+      fixedMessage: "",
+      fixLogic: "",
+      translated: "",
+    },
+    {
+      isMessageOk: false,
+      original: "I think she’s nice.",
+      fixedMessage: "Cred că este drăguță.",
+      fixLogic: "translated to Romanian",
+      translated: "I think she’s nice.",
+    },
+    {
+      isMessageOk: false,
+      original: "Eu sunt fericit astăzi.",
+      fixedMessage: "Sunt fericit astăzi.",
+      fixLogic: "removed unnecessary pronoun",
+      translated: "I am happy today.",
+    },
+    {
+      isMessageOk: false,
+      original: "Mâine I go la birou.",
+      fixedMessage: "Mâine merg la birou.",
+      fixLogic: "translated verb",
+      translated: "Tomorrow I go to the office.",
+    },
+  ],
+  "pt-PT": [
+    {
+      isMessageOk: true,
+      original: "Hoje vou ao supermercado.",
+      fixedMessage: "",
+      fixLogic: "",
+      translated: "",
+    },
+    {
+      isMessageOk: false,
+      original: "I believe it’s okay.",
+      fixedMessage: "Acredito que está tudo bem.",
+      fixLogic: "translated to Portuguese",
+      translated: "I believe it’s okay.",
+    },
+    {
+      isMessageOk: false,
+      original: "Eu é cansado hoje.",
+      fixedMessage: "Estou cansado hoje.",
+      fixLogic: "corrected verb",
+      translated: "I am tired today.",
+    },
+    {
+      isMessageOk: false,
+      original: "Amanhã I will visit meus pais.",
+      fixedMessage: "Amanhã vou visitar os meus pais.",
+      fixLogic: "translated verb and article",
+      translated: "Tomorrow I will visit my parents.",
+    },
+  ],
+  "uk-UA": [
+    {
+      isMessageOk: true,
+      original: "Я сьогодні дуже втомлений.",
+      fixedMessage: "",
+      fixLogic: "",
+      translated: "",
+    },
+    {
+      isMessageOk: false,
+      original: "I want to eat борщ.",
+      fixedMessage: "Я хочу з’їсти борщ.",
+      fixLogic: "translated English part",
+      translated: "I want to eat borscht.",
+    },
+    {
+      isMessageOk: false,
+      original: "Я є студент.",
+      fixedMessage: "Я студент.",
+      fixLogic: "removed unnecessary verb",
+      translated: "I am a student.",
+    },
+    {
+      isMessageOk: false,
+      original: "Завтра I go to market.",
+      fixedMessage: "Завтра я піду на ринок.",
+      fixLogic: "translated and reordered",
+      translated: "Tomorrow I go to the market.",
+    },
+  ],
+};
 
 export const getSample = (languageCode: supportedLanguage) => {
   const responses = samples[languageCode];
-  return responses.map(item => JSON.stringify(item)).join("\n")
-} 
+  return responses.map((item) => JSON.stringify(item)).join("\n");
+};

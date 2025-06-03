@@ -10,3 +10,4 @@ src/generated/
 !.elasticbeanstalk/*.global.yml
 docker-compose.yml
 dist
+.env.production

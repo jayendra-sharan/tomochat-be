@@ -6,20 +6,21 @@ import { getSystemPrompt } from "./getSystemPrompt";
 dotenv.config();
 
 const CLAUDE_API_KEY = process.env.CLAUDE_API_KEY;
-const BASE_URL = process.env.CLAUDE_BASE_URL || "https://api.anthropic.com/v1/messages";
+const BASE_URL =
+  process.env.CLAUDE_BASE_URL || "https://api.anthropic.com/v1/messages";
 
+export async function getAIResponse(
+  message: string,
+  languageCode: supportedLanguage
+): Promise<AiResponse> {
+  const messages = [{ role: "user", content: message }];
 
-export async function getAIResponse(message: string, languageCode: supportedLanguage): Promise<AiResponse> {
-  const messages = [
-    { role: 'user', content: message }
-  ];
-
-
+  const MODEL = process.env.CLAUDE_MODEL || "claude-3-5-sonnet-20241022";
   try {
     const response = await axios.post(
       BASE_URL,
       {
-        model: "claude-3-5-sonnet-20241022",
+        model: MODEL,
         max_tokens: 1024,
         temperature: 0,
         messages: messages,
@@ -30,7 +31,7 @@ export async function getAIResponse(message: string, languageCode: supportedLang
           "x-api-key": CLAUDE_API_KEY,
           "anthropic-version": "2023-06-01",
           "Content-Type": "application/json",
-        }
+        },
       }
     );
 
@@ -40,7 +41,6 @@ export async function getAIResponse(message: string, languageCode: supportedLang
 
     const result: AiResponse = JSON.parse(text);
     return result;
-
   } catch (error) {
     console.error("Claude API error:", error?.response?.data || error.message);
     throw error;

@@ -27,6 +27,7 @@ export const messageTypeDefs = gql`
     original: String!
     fixedMessage: String
     fixLogic: String
+    translated: String
   }
 
   input RoomMessagesInput {
