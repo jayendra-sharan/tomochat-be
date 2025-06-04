@@ -7,7 +7,8 @@ export const getAiResponse = async (
   message: string,
   languageCode: supportedLanguage
 ): Promise<AiResponse> => {
-  const aiService = isProduction ? claudeAi : groqAi;
+  // const aiService = isProduction ? claudeAi : groqAi;
+  const aiService = claudeAi;
   const response = await aiService(message, languageCode);
   return response;
 };

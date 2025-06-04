@@ -51,7 +51,7 @@ model Room {
   messages    Message[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
-  lastMessage String       @default("")
+  lastMessage String?       @default("")
   description String?
 }
 

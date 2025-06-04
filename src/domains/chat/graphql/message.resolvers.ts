@@ -1,4 +1,7 @@
-import { sendMessageService } from '../services/message.service';
+import {
+  getMessageService,
+  sendMessageService,
+} from "../services/message.service";
 
 export const messageResolvers = {
   Query: {
@@ -9,7 +12,7 @@ export const messageResolvers = {
       }
 
       const membership = await prisma.roomMember.findFirst({
-        where: { userId, roomId }
+        where: { userId, roomId },
       });
 
       if (!membership) {
@@ -17,13 +20,18 @@ export const messageResolvers = {
       }
 
       const room = await prisma.room.findUnique({
-        where: { id: roomId }
+        where: { id: roomId },
       });
-
 
       const messages = await prisma.message.findMany({
         where: {
-          roomId
+          roomId,
+          perUserStatus: {
+            none: {
+              userId,
+              isDeleted: true,
+            },
+          },
         },
         include: {
           sender: true,
@@ -40,22 +48,22 @@ export const messageResolvers = {
           },
         },
         orderBy: {
-          createdAt: 'asc',
-        }
+          createdAt: "asc",
+        },
       });
 
       return {
         messages,
         name: room.name,
         id: roomId,
-        userId
-      }
+        userId,
+      };
     },
   },
 
   Mutation: {
     sendMessage: async (_, { input }, { user, io, prisma }) => {
-      return sendMessageService({ input, user, prisma, io});
+      return sendMessageService({ input, user, prisma, io });
     },
 
     clearRoomMessages: async (_, { input }, { userId, prisma }) => {
@@ -65,10 +73,15 @@ export const messageResolvers = {
         where: { userId, roomId: input.roomId },
       });
 
-      if (!membership) throw new Error("You are not a member of this chat room");
+      if (!membership)
+        throw new Error("You are not a member of this chat room");
 
       await prisma.message.deleteMany({ where: { roomId: input.roomId } });
       return true;
+    },
+    deleteMessages: async (_, { input }, ctx) => {
+      const messageService = await getMessageService({ ctx });
+      return messageService.deleteMessages(input);
     },
   },
 };

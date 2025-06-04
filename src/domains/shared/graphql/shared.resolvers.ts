@@ -3,7 +3,7 @@ export const sharedResolvers = {
   RoomMember: {
     user: (parent) => parent.user,
     room: (parent) => parent.room,
-    joinedAt: (parent) => parent.joinedAt.toISOString(),
+    // joinedAt: (parent) => parent.joinedAt.toISOString(),
   },
   Room: {
     members: (parent) => parent.members,

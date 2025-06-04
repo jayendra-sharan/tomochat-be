@@ -4,6 +4,7 @@ import { joinRoomService } from "../services/joinRoom.service";
 import { getRoomDetailsService } from "../services/getRoomDetails.service";
 import { logger } from "@/lib/logger";
 import { createRoomService } from "../services/createRoom.service";
+import { formatLastMessage } from "../utils/formatLastMessage";
 
 export const roomsResolvers = {
   Query: {
@@ -25,6 +26,14 @@ export const roomsResolvers = {
               messages: {
                 take: 1,
                 orderBy: { createdAt: "desc" },
+                where: {
+                  perUserStatus: {
+                    none: {
+                      userId,
+                      isDeleted: true,
+                    },
+                  },
+                },
                 include: {
                   sender: true,
                   perUserStatus: {
@@ -51,17 +60,15 @@ export const roomsResolvers = {
         const lastMessage = room.messages?.[0];
         const isUnread = !lastMessage?.perUserStatus?.[0].isRead;
         const lastMessageSender = lastMessage?.sender;
-        let displayName =
-          lastMessageSender?.id === userId
-            ? "You"
-            : lastMessageSender?.id === "SYSTEM"
-              ? ""
-              : lastMessageSender?.displayName;
-
-        displayName = displayName ? `${displayName}: ` : "";
+        const lastMessageAt = lastMessage?.createdAt;
         return {
           ...room,
-          lastMessage: `${displayName}${lastMessage?.content}`,
+          lastMessage: formatLastMessage(
+            lastMessageSender,
+            lastMessage?.content,
+            userId
+          ),
+          lastMessageAt,
           isUnread,
         };
       });
@@ -138,12 +145,71 @@ export const roomsResolvers = {
       console.log("join room", input);
       return joinRoomService({ input, user, prisma, io });
     },
-    deleteGroup: async (_: any, { input }, { prisma }) => {
+    deleteRoom: async (_: any, { input }, { prisma, userId }) => {
+      const { roomId } = input;
+      try {
+        const admin = await prisma.roomMember.findUnique({
+          where: {
+            userId_roomId: { userId, roomId },
+          },
+        });
+
+        if (!admin || admin.role !== "admin") {
+          throw new Error("You are not authorised to perform this action.");
+        }
+
+        await prisma.room.delete({
+          where: { id: roomId },
+        });
+
+        return true;
+      } catch (error) {
+        logger.error(error, { method: "deleteRoom", userId, roomId });
+        throw new Error(error);
+      }
+    },
+    leaveRoom: async (_: any, { input }, { prisma, userId }) => {
       const { roomId } = input;
 
-      await prisma.room.delete({
-        where: { id: roomId },
+      const leavingMember = await prisma.roomMember.findUnique({
+        where: {
+          userId_roomId: { userId, roomId },
+        },
       });
+
+      if (!leavingMember) {
+        throw new Error("User is not a member of the room");
+      }
+
+      const isLeavingMemberAnAdmin = leavingMember.role === "admin";
+
+      let isLastAdmin = false;
+      if (isLeavingMemberAnAdmin) {
+        const adminCount = await prisma.roomMember.count({
+          where: {
+            roomId,
+            role: "admin",
+          },
+        });
+
+        isLastAdmin = adminCount === 1;
+      }
+
+      await prisma.roomMember.delete({
+        where: {
+          userId_roomId: {
+            userId,
+            roomId,
+          },
+        },
+      });
+
+      if (isLastAdmin) {
+        await prisma.roomMember.updateMany({
+          where: { roomId },
+          data: { role: "admin" },
+        });
+      }
 
       return true;
     },
@@ -171,6 +237,31 @@ export const roomsResolvers = {
       const room = await roomService.addMembersToRoom(input);
       roomService.notifyOnAddMembers(input);
       return room;
+    },
+    makeUserAdmin: async (_: any, { input }, ctx) => {
+      const { memberId, roomId } = input;
+      const { prisma, userId } = ctx;
+
+      const admin = await prisma.roomMember.findUnique({
+        where: {
+          userId_roomId: { userId, roomId },
+        },
+      });
+
+      if (!admin || admin.role !== "admin") {
+        throw new Error("You do not have permission to perform this action.");
+      }
+
+      await prisma.roomMember.update({
+        where: {
+          userId_roomId: { userId: memberId, roomId },
+        },
+        data: {
+          role: "admin",
+        },
+      });
+
+      return true;
     },
   },
 };

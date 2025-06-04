@@ -6,7 +6,7 @@ import { AiResponse, supportedLanguage } from "@/services/types";
 import { Server } from "socket.io";
 import { Prisma, PrismaClient, User } from "@/generated/prisma/client";
 import { DbTx } from "@/lib/prisma";
-
+import { logger } from "@/lib/logger";
 
 type SendMessageInput = {
   roomId: string;
@@ -46,7 +46,10 @@ export const sendMessageTx = async ({
 
   // Run AI moderation (if not system message)
   if (!isSystemMessage) {
-    const aiResponse = await getAiResponse(content, room.topic as supportedLanguage);
+    const aiResponse = await getAiResponse(
+      content,
+      room.topic as supportedLanguage
+    );
     if (aiResponse && !aiResponse.isMessageOk) {
       suggestion = aiResponse;
       finalMessageContent = aiResponse.fixedMessage;
@@ -87,7 +90,9 @@ export const sendMessageTx = async ({
 };
 
 // Wrapper for standalone use with internal transaction
-export const sendMessageService = async (args: Omit<SendMessageArgs, "prisma"> & { prisma: PrismaClient }) => {
+export const sendMessageService = async (
+  args: Omit<SendMessageArgs, "prisma"> & { prisma: PrismaClient }
+) => {
   try {
     return await args.prisma.$transaction(async (tx) =>
       sendMessageTx({ ...args, prisma: tx })
@@ -95,4 +100,52 @@ export const sendMessageService = async (args: Omit<SendMessageArgs, "prisma"> &
   } catch (error) {
     throw new Error(`sendMessageService failed: ${error.message}`);
   }
+};
+
+export const getMessageService = async ({ ctx }) => {
+  const { userId, prisma } = ctx;
+  return {
+    deleteMessages: async (input: { roomId: string }) => {
+      const { roomId } = input;
+      if (!userId) throw new Error("Not authenticated");
+
+      const membership = await prisma.roomMember.findFirst({
+        where: { userId, roomId: input.roomId },
+      });
+
+      if (!membership) {
+        throw new Error("You are not a member of this chat room");
+      }
+
+      const messages = await prisma.message.findMany({
+        where: { roomId },
+        select: { id: true },
+      });
+
+      logger.info("Messages", messages);
+      const updates = await Promise.all(
+        messages.map(({ id }) =>
+          prisma.messageStatus.upsert({
+            where: {
+              messageId_userId: {
+                messageId: id,
+                userId,
+              },
+            },
+            update: {
+              isDeleted: true,
+              deletedAt: new Date(),
+            },
+            create: {
+              messageId: id,
+              userId,
+              isDeleted: true,
+              deletedAt: new Date(),
+            },
+          })
+        )
+      );
+      return !!updates.length;
+    },
+  };
 };

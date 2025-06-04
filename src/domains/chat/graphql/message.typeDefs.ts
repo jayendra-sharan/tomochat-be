@@ -45,12 +45,17 @@ export const messageTypeDefs = gql`
     roomId: ID!
   }
 
+  input DeleteMessagesInput {
+    roomId: ID!
+  }
+
   extend type Query {
     roomMessages(input: RoomMessagesInput!): RoomMessages!
   }
 
   extend type Mutation {
     sendMessage(input: SendMessageInput!): Message!
+    deleteMessages(input: DeleteMessagesInput!): Boolean!
     clearRoomMessages(input: ClearRoomMessagesInput!): Boolean!
   }
 `;

@@ -22,6 +22,7 @@ export const roomsTypeDefs = gql`
     createdAt: String
     updatedAt: String
     lastMessage: String
+    lastMessageAt: String
     isUnread: Boolean
     messageCount: Int
   }
@@ -41,7 +42,11 @@ export const roomsTypeDefs = gql`
     result: Boolean
   }
 
-  input DeleteGroupInput {
+  input DeleteRoomInput {
+    roomId: String!
+  }
+
+  input LeaveRoomInput {
     roomId: String!
   }
 
@@ -58,6 +63,11 @@ export const roomsTypeDefs = gql`
     memberIds: [String!]!
   }
 
+  input MakeUserAdminInput {
+    roomId: String!
+    memberId: String!
+  }
+
   extend type Query {
     getRoomDetails(input: GetRoomDetailsInput): Room!
     rooms: [Room!]!
@@ -66,8 +76,10 @@ export const roomsTypeDefs = gql`
   extend type Mutation {
     createRoom(input: CreateRoomInput!): Room!
     joinRoom(input: JoinRoomInput!): JoinRoomResponse
-    deleteGroup(input: DeleteGroupInput!): Boolean!
+    deleteRoom(input: DeleteRoomInput!): Boolean!
+    leaveRoom(input: LeaveRoomInput!): Boolean!
     clearGroupMessages(input: ClearGroupMessagesInput!): Boolean!
     addMembersToRoom(input: AddMembersToRoomInput!): Room!
+    makeUserAdmin(input: MakeUserAdminInput): Boolean!
   }
 `;
