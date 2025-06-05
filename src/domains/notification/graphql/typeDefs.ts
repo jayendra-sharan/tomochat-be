@@ -1,4 +1,4 @@
-import { gql } from 'graphql-tag';
+import { gql } from "graphql-tag";
 
 export const notificationTypeDefs = gql`
   input RegisterPushTokenInput {
@@ -6,7 +6,12 @@ export const notificationTypeDefs = gql`
     platform: String! # 'expo', 'fcm-web', etc.
   }
 
+  input SendTestNotificationInput {
+    userId: String!
+  }
+
   extend type Mutation {
     registerPushToken(input: RegisterPushTokenInput!): Boolean!
+    sendTestNotification(input: SendTestNotificationInput!): Boolean!
   }
 `;
