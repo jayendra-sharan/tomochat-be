@@ -1,7 +1,8 @@
-import { PrismaClient } from "@/lib/prisma";
-import { sendExpoPush } from "./utils";
+import { prisma, PrismaClient } from "@/lib/prisma";
 import { Expo } from "expo-server-sdk";
 import { logger } from "@/lib/logger";
+
+const expo = new Expo();
 
 export async function registerToken(
   userId: string,
@@ -26,25 +27,42 @@ export async function registerToken(
   }
 }
 
-export async function sendUserNotification(
-  userId: string,
-  title: string,
-  body: string,
-  prisma: PrismaClient
-) {
-  const tokens = await prisma.notificationToken.findMany({ where: { userId } });
-  if (!tokens.length) return;
+export const sendNewMessagePushNotification = async ({
+  userId,
+  title,
+  body,
+  data,
+}: {
+  userId: string;
+  title: string;
+  body: string;
+  data?: Record<string, any>;
+}) => {
+  try {
+    const tokens = await prisma.notificationToken.findMany({
+      where: { userId, platform: "expo" },
+      select: { token: true },
+    });
 
-  return sendExpoPush(
-    tokens.map((t) => t.token),
-    title,
-    body
-  );
-}
+    const messages = tokens
+      .filter(({ token }) => Expo.isExpoPushToken(token))
+      .map(({ token }) => ({
+        to: token,
+        title,
+        body,
+        sound: "default",
+        data,
+      }));
+
+    if (messages.length > 0) {
+      await expo.sendPushNotificationsAsync(messages);
+    }
+  } catch (err) {
+    console.error(`[push] Failed for user ${userId}:`, err);
+  }
+};
 
 // @todo TEST
-
-const expo = new Expo();
 export async function sendPushNotification(token: string, message: string) {
   console.log(`[📡] Attempting to send push to token: ${token}`);
   if (!Expo.isExpoPushToken(token)) {

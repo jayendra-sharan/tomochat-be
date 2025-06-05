@@ -7,6 +7,7 @@ import { Server } from "socket.io";
 import { Prisma, PrismaClient, User } from "@/generated/prisma/client";
 import { DbTx } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
+import { sendNewMessagePushNotification } from "@/domains/notification/service";
 
 type SendMessageInput = {
   roomId: string;
@@ -63,7 +64,7 @@ export const sendMessageTx = async ({
   await dbTx.updateRoomLastMessage(finalMessageContent, isSystemMessage);
 
   // Notify members (except sender or system)
-  membersId.forEach((memberId) => {
+  for (const memberId of membersId) {
     if (memberId !== senderId && senderId !== "SYSTEM") {
       emitInAppNotification({
         io,
@@ -78,7 +79,16 @@ export const sendMessageTx = async ({
         },
       });
     }
-  });
+
+    sendNewMessagePushNotification({
+      userId: memberId,
+      title: room.name || "New message",
+      body: isSystemMessage
+        ? finalMessageContent
+        : `${displayName}: ${finalMessageContent}`,
+      data: { roomId },
+    });
+  }
 
   // Emit to socket
   io.to(roomId).emit(SocketEvents.NEW_MESSAGE, {
@@ -122,7 +132,6 @@ export const getMessageService = async ({ ctx }) => {
         select: { id: true },
       });
 
-      logger.info("Messages", messages);
       const updates = await Promise.all(
         messages.map(({ id }) =>
           prisma.messageStatus.upsert({
