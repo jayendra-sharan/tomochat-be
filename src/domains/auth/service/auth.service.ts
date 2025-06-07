@@ -3,6 +3,7 @@ import { logger } from "@/lib/logger";
 import { addMinutes } from "date-fns";
 import { getEmailService } from "@/services/email";
 import { generateToken } from "@/services/generateToken";
+import { firebaseAdminAuth } from "./firebase/firebaseAdmin";
 
 export const getAuthService = async ({ ctx }) => {
   return {
@@ -41,28 +42,21 @@ export const getAuthService = async ({ ctx }) => {
     },
     requestPasswordReset: async ({ input }) => {
       try {
-        const { prisma } = ctx;
-        const user = await prisma.user.findUnique({
-          where: { email: input.email },
-        });
-        if (!user) {
-          return true;
-        }
-        const token = await generateToken();
-        const expiresAt = addMinutes(new Date(), 30);
-        await prisma.passwordResetToken.create({
-          data: {
-            token,
-            userId: user.id,
-            expiresAt,
-          },
-        });
-
-        const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
-        const emailService = await getEmailService();
+        // @todo maybe use rest for this
+        const { email } = input;
+        const firebaseLink = await firebaseAdminAuth.generatePasswordResetLink(email, {
+          url: `${process.env.REGISTER_LINK_DOMAIN}/reset`,
+          handleCodeInApp: true
+        })
+  
+        const url = new URL(firebaseLink);
+        const oobCode = url.searchParams.get('oobCode');
+  
+        const customLink = `${process.env.FRONTEND_URL}/reset?oobCode=${oobCode}`;
+        const emailService = await getEmailService();  
         await emailService.passwordRecovery({
-          link: resetLink,
-          email: user.email,
+          link: customLink,
+          email: email,
         });
         return true;
       } catch (error) {
