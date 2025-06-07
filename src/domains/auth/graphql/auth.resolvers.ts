@@ -4,6 +4,8 @@ import bcryptjs from "bcryptjs";
 import { verifyEmailCode } from "../service/emailVerification";
 import { createJwt } from "@/lib/jwt";
 import { getAuthService } from "../service/auth.service";
+import { firebaseAdminAuth } from "../service/firebase/firebaseAdmin";
+import { logger } from "@/lib/logger";
 
 export const authResolvers = {
   Query: {
@@ -13,7 +15,7 @@ export const authResolvers = {
       }
 
       const user = await prisma.user.findUnique({
-        where: { id: userId },
+        where: { firebaseUid: userId },
         include: {
           rooms: {
             include: {
@@ -55,23 +57,44 @@ export const authResolvers = {
   },
   Mutation: {
     createUser: async (_, { input }, { prisma }) => {
+      try {
+        const { idToken, displayName, userType = "human" } = input;
+      const decoded = await firebaseAdminAuth.verifyIdToken(idToken);
+      const { uid: firebaseUid, email } = decoded;
+
       const existing = await prisma.user.findUnique({
-        where: { email: input.email },
+        where: { firebaseUid },
       });
+
       if (existing) throw new Error("User already exist");
 
-      const hashedPassword = await bcryptjs.hash(input.password, 10);
       const user = await prisma.user.create({
         data: {
-          email: input.email,
-          displayName: input.displayName,
-          userType: input.userType || "human",
-          password: hashedPassword,
+          firebaseUid,
+          email: email,
+          displayName: displayName,
+          userType: userType,
         },
       });
 
-      await requestEmailVerification(user.email);
+      const firebaseLink = await firebaseAdminAuth.generateEmailVerificationLink(email, {
+        url: `${process.env.REGISTER_LINK_DOMAIN}/verify`,
+        handleCodeInApp: true
+      });
+
+      const url = new URL(firebaseLink);
+      const oobCode = url.searchParams.get('oobCode');
+
+      const customLink = `http://localhost:8081/verify?oobCode=${oobCode}`;
+
+
+
+      requestEmailVerification({ displayName, email, link: customLink });
+
       return user;
+      } catch (error) {
+        logger.error(error, { method: "createUser" })
+      }
     },
     requestEmailVerification: async (_, { input }) => {
       return requestEmailVerification(input.email);

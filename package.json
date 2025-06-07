@@ -6,8 +6,8 @@
     "dev": "NODE_ENV=development ts-node-dev --respawn --transpile-only --require tsconfig-paths/register src/index.ts",
     "build:dev": "tsc",
     "build:app": "npm run clean && npm ci && npx ts-patch install && tsc --noEmitOnError false",
-    "build:prod:reset": "npm run clean && npm ci && npx ts-patch install && tsc --noEmitOnError false && prisma migrate reset --force --skip-seed && prisma generate",
-    "build:prod": "npm run clean && npm ci && npx ts-patch install && tsc --noEmitOnError false && prisma migrate deploy && prisma generate",
+    "build:prod": "npm run clean && npm ci && npx ts-patch install && tsc --noEmitOnError false && prisma migrate reset --force --skip-seed && prisma generate",
+    "build:prod:re": "npm run clean && npm ci && npx ts-patch install && tsc --noEmitOnError false && prisma migrate deploy && prisma generate",
     "start": "node dist/index.js",
     "clean": "rm -rf dist"
   },
@@ -44,6 +44,7 @@
     "expo-server-sdk": "^3.15.0",
     "express": "^5.1.0",
     "fastify": "^5.3.2",
+    "firebase-admin": "^13.4.0",
     "graphql": "^16.11.0",
     "graphql-fields": "^2.0.3",
     "graphql-tag": "^2.12.6",

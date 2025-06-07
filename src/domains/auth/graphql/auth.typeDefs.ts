@@ -9,7 +9,6 @@ export const authTypeDefs = gql`
     rooms: [Room!]!
     createdAt: String!
     updatedAt: String!
-    isEmailVerified: Boolean!
   }
 
   type Auth {
@@ -18,9 +17,8 @@ export const authTypeDefs = gql`
   }
 
   input CreateUserInput {
-    email: String!
+    idToken: String!
     displayName: String!
-    password: String!
     userType: String
   }
 

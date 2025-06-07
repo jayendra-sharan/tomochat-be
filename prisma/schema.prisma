@@ -10,24 +10,21 @@ datasource db {
 
 model User {
   id                 String              @id @default(cuid())
+  firebaseUid        String              @unique
   email              String              @unique
   displayName        String
-  password           String
   userType           String              @default("human") // "human" | "system"
   rooms              RoomMember[]
   messages           Message[]
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
   notificationTokens NotificationToken[]
-  MessageStatus      MessageStatus[]
-  isEmailVerified    Boolean             @default(false)
-  VerificationCode   VerificationCode[]
-
-  connectionsA UserConnection[] @relation("ConnectionA")
-  connectionsB UserConnection[] @relation("ConnectionB")
-
   profile            UserProfile?
-  PasswordResetToken PasswordResetToken[]
+
+  MessageStatus MessageStatus[]
+  connectionsA  UserConnection[] @relation("ConnectionA")
+  connectionsB  UserConnection[] @relation("ConnectionB")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model UserProfile {
@@ -51,7 +48,7 @@ model Room {
   messages    Message[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
-  lastMessage String?       @default("")
+  lastMessage String?      @default("")
   description String?
 }
 
@@ -107,16 +104,6 @@ model MessageStatus {
   @@unique([messageId, userId])
 }
 
-model VerificationCode {
-  id        String   @id @default(cuid())
-  userId    String
-  code      String
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id])
-}
-
 model UserConnection {
   id        String   @id @default(cuid())
   userA     User     @relation("ConnectionA", fields: [userAId], references: [id])
@@ -126,14 +113,4 @@ model UserConnection {
   createdAt DateTime @default(now())
 
   @@unique([userAId, userBId])
-}
-
-model PasswordResetToken {
-  id        String   @id @default(cuid())
-  token     String   @unique
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-  purpose String @default("PASSWORD_RESET")
 }
