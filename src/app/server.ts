@@ -11,6 +11,7 @@ import { schema } from "./schema";
 import { logger } from "@/lib/logger";
 import { createTomo } from "@/domains/admin/routes/createTomo";
 import { createTestUsers } from "@/domains/admin/routes/testUsers";
+import { handleError } from "@/domains/shared/errors/handler";
 
 const Sentry = require("@sentry/node");
 
@@ -26,7 +27,9 @@ const yoga = createYoga({
   graphqlEndpoint: "/graphql",
   cors: { origin: "*", credentials: true },
   maskedErrors: false,
+  plugins: [handleError],
 });
+
 app.get("/", (_, res) => {
   res.send("OK");
 });

@@ -35,6 +35,11 @@ export class ConflictError extends BaseError {
     super(message, "CONFLICT", extensions);
   }
 }
+export class InternalServerError extends BaseError {
+  constructor(message = "Something went wrong") {
+    super(message, "INTERNAL_SERVER_ERROR");
+  }
+}
 
 export const ChatErrors = {
   // AUTHENTICATION ERROR

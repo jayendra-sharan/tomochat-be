@@ -1,4 +1,3 @@
-import { GraphQLContext } from "@/app/context";
 import { requestEmailVerification } from "@/services/emailVerification";
 import bcryptjs from "bcryptjs";
 import { verifyEmailCode } from "../service/emailVerification";
@@ -7,6 +6,7 @@ import { getAuthService } from "../service/auth.service";
 import { logger } from "@/lib/logger";
 import { joinRoomService } from "@/domains/rooms/services/joinRoom.service";
 import { ChatErrors } from "@/domains/shared/errors";
+import { GraphQLContext } from "@/types/graphql-context";
 
 const isDev = process.env.NODE_ENV === "development";
 
