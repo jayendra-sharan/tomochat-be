@@ -5,82 +5,79 @@ import { getRoomDetailsService } from "../services/getRoomDetails.service";
 import { logger } from "@/lib/logger";
 import { createRoomService } from "../services/createRoom.service";
 import { formatLastMessage } from "../utils/formatLastMessage";
+import { ChatErrors } from "@/domains/shared/errors";
 
 export const roomsResolvers = {
   Query: {
     rooms: async (_, __, { userId, prisma }) => {
-      try {
-        if (!userId) throw new Error("User not authenticated");
-        const memberships = await prisma.roomMember.findMany({
-          where: {
-            userId,
-          },
-          include: {
-            room: {
-              include: {
-                members: {
-                  include: {
-                    user: true,
-                  },
+      if (!userId) throw ChatErrors.USER_NOT_LOGGED_IN;
+
+      const memberships = await prisma.roomMember.findMany({
+        where: {
+          userId,
+        },
+        include: {
+          room: {
+            include: {
+              members: {
+                include: {
+                  user: true,
                 },
-                messages: {
-                  take: 1,
-                  orderBy: { createdAt: "desc" },
-                  where: {
-                    perUserStatus: {
-                      none: {
-                        userId,
-                        isDeleted: true,
-                      },
+              },
+              messages: {
+                take: 1,
+                orderBy: { createdAt: "desc" },
+                where: {
+                  perUserStatus: {
+                    none: {
+                      userId,
+                      isDeleted: true,
                     },
                   },
-                  include: {
-                    sender: true,
-                    perUserStatus: {
-                      where: { userId },
-                      select: {
-                        isRead: true,
-                      },
+                },
+                include: {
+                  sender: true,
+                  perUserStatus: {
+                    where: { userId },
+                    select: {
+                      isRead: true,
                     },
                   },
                 },
               },
             },
           },
-          orderBy: {
-            room: {
-              updatedAt: "desc",
-            },
+        },
+        orderBy: {
+          room: {
+            updatedAt: "desc",
           },
-        });
+        },
+      });
 
-        const rooms = memberships.map((m) => {
-          // @todo refactor
-          const room = m.room;
-          const lastMessage = room.messages?.[0];
-          const isUnread = !lastMessage?.perUserStatus?.[0].isRead;
-          const lastMessageSender = lastMessage?.sender;
-          const lastMessageAt = lastMessage?.createdAt;
-          return {
-            ...room,
-            lastMessage: formatLastMessage(
-              lastMessageSender,
-              lastMessage?.content,
-              userId
-            ),
-            lastMessageAt,
-            isUnread,
-          };
-        });
-        return rooms;
-      } catch (error) {
-        logger.error("Error in fetching rooms", error);
-        throw new Error(error);
-      }
+      const rooms = memberships.map((m) => {
+        // @todo refactor
+        const room = m.room;
+        const lastMessage = room.messages?.[0];
+        const isUnread = !lastMessage?.perUserStatus?.[0].isRead;
+        const lastMessageSender = lastMessage?.sender;
+        const lastMessageAt = lastMessage?.createdAt;
+        return {
+          ...room,
+          lastMessage: formatLastMessage(
+            lastMessageSender,
+            lastMessage?.content,
+            userId
+          ),
+          lastMessageAt,
+          isUnread,
+        };
+      });
+      return rooms;
     },
     getRoomDetails: async (_: any, { input }, { userId, prisma }) => {
       if (!userId) {
-        throw new Error("User not authorised");
+        throw ChatErrors.USER_NOT_LOGGED_IN;
       }
       const { roomId } = input;
       return getRoomDetailsService({ roomId, prisma });
@@ -88,88 +85,78 @@ export const roomsResolvers = {
   },
   Mutation: {
     createRoom: async (_, { input }, { userId, user, prisma, io }) => {
-      try {
-        if (!userId) {
-          return "user not authenticated";
-        }
+      if (!userId) {
+        throw ChatErrors.USER_NOT_LOGGED_IN;
+      }
 
-        const inviteLink = crypto.randomBytes(4).toString("hex");
-        const { name, language, userDisplayName, ...rest } = input;
+      const inviteLink = crypto.randomBytes(4).toString("hex");
+      const { name, language, userDisplayName, ...rest } = input;
 
-        // @todo update mapping of fields in rooms schemam
-        const fields = {
-          name,
-          roomType: "private",
-          topic: language,
-        };
+      // @todo update mapping of fields in rooms schemam
+      const fields = {
+        name,
+        roomType: "private",
+        topic: language,
+      };
 
-        const room = await prisma.room.create({
-          data: {
-            ...fields,
-            ...rest,
-            inviteLink,
-            members: { create: [{ userId, role: "admin" }] },
-          },
-          include: {
-            members: {
-              include: {
-                user: true,
-              },
+      const room = await prisma.room.create({
+        data: {
+          ...fields,
+          ...rest,
+          inviteLink,
+          members: { create: [{ userId, role: "admin" }] },
+        },
+        include: {
+          members: {
+            include: {
+              user: true,
             },
           },
-        });
+        },
+      });
 
-        // no need to broadcast this message - @todo extract to function
-        await sendMessageService({
-          input: {
-            roomId: room.id,
-            content: `${userDisplayName} created the group.`,
-          },
-          user: {
-            id: "SYSTEM",
-            displayName: "",
-          },
-          prisma,
-          io,
-          isSystemMessage: true,
-        });
+      // no need to broadcast this message - @todo extract to function
+      await sendMessageService({
+        input: {
+          roomId: room.id,
+          content: `${userDisplayName} created the group.`,
+        },
+        user: {
+          id: "SYSTEM",
+          displayName: "",
+        },
+        prisma,
+        io,
+        isSystemMessage: true,
+      });
 
-        return {
-          ...room,
-          lastMessage: `${userDisplayName} created the group.`,
-          isUnread: true,
-          inviteLink: `${room.id}--${inviteLink}`,
-        };
-      } catch (error) {
-        logger.error(`Error in createRoom: - ${error.message}`);
-        throw new Error(`Error in createRoom: - ${error.message}`);
-      }
+      return {
+        ...room,
+        lastMessage: `${userDisplayName} created the group.`,
+        isUnread: true,
+        inviteLink: `${room.id}--${inviteLink}`,
+      };
     },
     joinRoom: async (_, { input }, { user, prisma, io }) => {
       return joinRoomService({ input, user, prisma, io });
     },
     deleteRoom: async (_: any, { input }, { prisma, userId }) => {
       const { roomId } = input;
-      try {
-        const admin = await prisma.roomMember.findUnique({
-          where: {
-            userId_roomId: { userId, roomId },
-          },
-        });
+      const admin = await prisma.roomMember.findUnique({
+        where: {
+          userId_roomId: { userId, roomId },
+        },
+      });
 
-        if (!admin || admin.role !== "admin") {
-          throw new Error("You are not authorised to perform this action.");
-        }
-
-        await prisma.room.delete({
-          where: { id: roomId },
-        });
-
-        return true;
-      } catch (error) {
-        logger.error(error, { method: "deleteRoom", userId, roomId });
-        throw new Error(error);
+      if (!admin || admin.role !== "admin") {
+        throw ChatErrors.NOT_AN_ADMIN;
       }
+
+      await prisma.room.delete({
+        where: { id: roomId },
+      });
+
+      return true;
     },
     leaveRoom: async (_: any, { input }, { prisma, userId }) => {
       const { roomId } = input;
@@ -181,7 +168,7 @@ export const roomsResolvers = {
       });
 
       if (!leavingMember) {
-        throw new Error("User is not a member of the room");
+        throw ChatErrors.NOT_A_MEMBER;
       }
 
       const isLeavingMemberAnAdmin = leavingMember.role === "admin";
@@ -252,7 +239,7 @@ export const roomsResolvers = {
       });
 
       if (!admin || admin.role !== "admin") {
-        throw new Error("You do not have permission to perform this action.");
+        throw ChatErrors.NOT_AN_ADMIN;
       }
 
       await prisma.roomMember.update({

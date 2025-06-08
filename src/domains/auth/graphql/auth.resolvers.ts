@@ -6,6 +6,7 @@ import { createJwt } from "@/lib/jwt";
 import { getAuthService } from "../service/auth.service";
 import { logger } from "@/lib/logger";
 import { joinRoomService } from "@/domains/rooms/services/joinRoom.service";
+import { ChatErrors } from "@/domains/shared/errors";
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -13,7 +14,7 @@ export const authResolvers = {
   Query: {
     me: async (_: any, _args: any, { userId, prisma }: GraphQLContext) => {
       if (!userId) {
-        throw new Error("User not authenticated");
+        throw ChatErrors.USER_NOT_LOGGED_IN;
       }
 
       const user = await prisma.user.findUnique({
@@ -35,7 +36,7 @@ export const authResolvers = {
         },
       });
       if (!user) {
-        throw new Error("User not found!");
+        throw ChatErrors.USER_NOT_FOUND;
       }
 
       const rooms = user.rooms.map((gm) => gm.room);
@@ -50,7 +51,7 @@ export const authResolvers = {
         where: { email: input.email },
       });
       if (!user || !(await bcryptjs.compare(input.password, user.password))) {
-        throw new Error("Invalid email address or password");
+        throw ChatErrors.INVALID_EMAIL_PASSWORD;
       }
 
       const token = createJwt(user.id);
@@ -62,7 +63,7 @@ export const authResolvers = {
       const existing = await prisma.user.findUnique({
         where: { email: input.email },
       });
-      if (existing) throw new Error("User already exist");
+      if (existing) throw ChatErrors.EXISTING_USER;
 
       const hashedPassword = await bcryptjs.hash(input.password, 10);
       const user = await prisma.user.create({

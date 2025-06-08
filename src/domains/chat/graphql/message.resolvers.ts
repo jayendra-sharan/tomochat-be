@@ -1,4 +1,9 @@
 import {
+  AuthenticationError,
+  AuthorizationError,
+  ChatErrors,
+} from "@/domains/shared/errors";
+import {
   getMessageService,
   sendMessageService,
 } from "../services/message.service";
@@ -8,7 +13,7 @@ export const messageResolvers = {
     roomMessages: async (_, { input }, { userId, prisma }) => {
       const { roomId } = input;
       if (!userId) {
-        return "User not authenticated";
+        throw ChatErrors.USER_NOT_LOGGED_IN;
       }
 
       const membership = await prisma.roomMember.findFirst({
@@ -16,7 +21,7 @@ export const messageResolvers = {
       });
 
       if (!membership) {
-        return "You are not a member of this chat room";
+        throw ChatErrors.NOT_A_MEMBER;
       }
 
       const room = await prisma.room.findUnique({
@@ -73,8 +78,9 @@ export const messageResolvers = {
         where: { userId, roomId: input.roomId },
       });
 
-      if (!membership)
-        throw new Error("You are not a member of this chat room");
+      if (!membership) {
+        throw ChatErrors.NOT_A_MEMBER;
+      }
 
       await prisma.message.deleteMany({ where: { roomId: input.roomId } });
       return true;

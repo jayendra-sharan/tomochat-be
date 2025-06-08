@@ -2,6 +2,7 @@ import { GraphQLContext } from "@/app/context";
 import { logger } from "@/lib/logger";
 import { addMembersToRoom } from "../db/addMembersToRoom.db";
 import { sendMessageService } from "@/domains/chat/services/message.service";
+import { ChatErrors } from "@/domains/shared/errors";
 
 type AddMemberToRoom = {
   roomId: string;
@@ -11,18 +12,13 @@ type AddMemberToRoom = {
 export const createRoomService = async (ctx: GraphQLContext) => {
   return {
     addMembersToRoom: async (input: AddMemberToRoom) => {
-      try {
-        const { roomId, memberIds } = input;
-        const { prisma, userId } = ctx;
-        if (!userId) {
-          throw new Error(`User not authorised`);
-        }
-
-        return addMembersToRoom({ roomId, memberIds, prisma });
-      } catch (error) {
-        logger.error(`Error in createRoomMember: ${error?.message}`);
-        throw new Error(`Error in createRoomMember: ${error?.message}`);
+      const { roomId, memberIds } = input;
+      const { prisma, userId } = ctx;
+      if (!userId) {
+        throw ChatErrors.USER_NOT_LOGGED_IN;
       }
+
+      return addMembersToRoom({ roomId, memberIds, prisma });
     },
     notifyOnAddMembers: async (input) => {
       const { memberIds, roomId } = input;

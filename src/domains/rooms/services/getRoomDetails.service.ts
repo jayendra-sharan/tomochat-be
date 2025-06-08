@@ -1,6 +1,5 @@
+import { ChatErrors } from "@/domains/shared/errors";
 import { PrismaClient } from "@/lib/prisma";
-import { GraphQLResolveInfo } from "graphql";
-import { fetchRoomDetails } from "../db/fetchRoom.db";
 
 type GetRoomDetailsService = {
   prisma: PrismaClient;
@@ -25,7 +24,7 @@ export const getRoomDetailsService = async ({
   });
 
   if (!room) {
-    throw new Error("Room not found");
+    throw ChatErrors.ROOM_NOT_FOUND;
   }
   return room;
 };

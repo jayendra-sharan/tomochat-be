@@ -4,10 +4,10 @@ import { createMessageDb } from "../db/message.db";
 import { emitInAppNotification } from "@/domains/socket/socketService";
 import { AiResponse, supportedLanguage } from "@/services/types";
 import { Server } from "socket.io";
-import { Prisma, PrismaClient, User } from "@/generated/prisma/client";
+import { PrismaClient, User } from "@/generated/prisma/client";
 import { DbTx } from "@/lib/prisma";
-import { logger } from "@/lib/logger";
 import { sendNewMessagePushNotification } from "@/domains/notification/service";
+import { ChatErrors } from "@/domains/shared/errors";
 
 type SendMessageInput = {
   roomId: string;
@@ -42,7 +42,7 @@ export const sendMessageTx = async ({
   });
 
   if (!room) {
-    throw new Error(`Room not found: ${roomId}`);
+    throw ChatErrors.ROOM_NOT_FOUND;
   }
 
   // Run AI moderation (if not system message)
@@ -103,13 +103,9 @@ export const sendMessageTx = async ({
 export const sendMessageService = async (
   args: Omit<SendMessageArgs, "prisma"> & { prisma: PrismaClient }
 ) => {
-  try {
-    return await args.prisma.$transaction(async (tx) =>
-      sendMessageTx({ ...args, prisma: tx })
-    );
-  } catch (error) {
-    throw new Error(`sendMessageService failed: ${error.message}`);
-  }
+  return await args.prisma.$transaction(async (tx) =>
+    sendMessageTx({ ...args, prisma: tx })
+  );
 };
 
 export const getMessageService = async ({ ctx }) => {
@@ -124,7 +120,7 @@ export const getMessageService = async ({ ctx }) => {
       });
 
       if (!membership) {
-        throw new Error("You are not a member of this chat room");
+        throw ChatErrors.NOT_A_MEMBER;
       }
 
       const messages = await prisma.message.findMany({
