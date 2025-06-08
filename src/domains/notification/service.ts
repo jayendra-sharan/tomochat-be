@@ -40,7 +40,7 @@ export const sendNewMessagePushNotification = async ({
 }) => {
   try {
     const tokens = await prisma.notificationToken.findMany({
-      where: { userId, platform: "expo" },
+      where: { userId },
       select: { token: true },
     });
 

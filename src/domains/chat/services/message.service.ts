@@ -47,7 +47,9 @@ export const sendMessageTx = async ({
   }
 
   // Run AI moderation (if not system message)
-  if (!isSystemMessage) {
+  const skipApiCheck =
+    process.env.NODE_ENV === "development" || isSystemMessage;
+  if (!skipApiCheck) {
     const aiResponse = await getAiResponse(
       content,
       room.topic as supportedLanguage
@@ -65,6 +67,7 @@ export const sendMessageTx = async ({
   await dbTx.updateRoomLastMessage(finalMessageContent, isSystemMessage);
 
   // Notify members (except sender or system)
+
   for (const memberId of membersId) {
     if (memberId !== senderId && senderId !== "SYSTEM") {
       emitInAppNotification({
