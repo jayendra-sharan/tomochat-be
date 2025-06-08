@@ -78,16 +78,18 @@ export const sendMessageTx = async ({
           roomId,
         },
       });
-    }
 
-    sendNewMessagePushNotification({
-      userId: memberId,
-      title: room.name?.trim() || "New message",
-      body: isSystemMessage
-        ? finalMessageContent
-        : `${displayName}: ${finalMessageContent}`,
-      data: { roomId, type: "chat" },
-    });
+      if (!isSystemMessage) {
+        sendNewMessagePushNotification({
+          userId: memberId,
+          title: room.name?.trim() || "New message",
+          body: isSystemMessage
+            ? finalMessageContent
+            : `${displayName}: ${finalMessageContent}`,
+          data: { roomId, type: "chat" },
+        });
+      }
+    }
   }
 
   // Emit to socket
