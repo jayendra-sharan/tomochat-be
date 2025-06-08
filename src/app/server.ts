@@ -9,6 +9,8 @@ import { createContext } from "./context";
 import { initSocket } from "@/lib/socket";
 import { schema } from "./schema";
 import { logger } from "@/lib/logger";
+import { createTomo } from "@/domains/admin/routes/createTomo";
+
 const Sentry = require("@sentry/node");
 
 const app = express();
@@ -27,6 +29,7 @@ const yoga = createYoga({
 app.get("/", (_, res) => {
   res.send("OK");
 });
+app.get("/user/create-tomo", createTomo);
 app.use("/graphql", yoga.requestListener);
 app.get("/run-migrations", async (req, res) => {
   // const auth = req.headers.authorization;
