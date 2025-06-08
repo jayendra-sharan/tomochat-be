@@ -44,24 +44,47 @@ export const sendNewMessagePushNotification = async ({
       select: { token: true },
     });
 
-    const messages = tokens
-      .filter(({ token }) => Expo.isExpoPushToken(token))
-      .map(({ token }) => ({
-        to: token,
-        title,
-        body,
-        sound: "default",
-        data,
-      }));
+    const validTokens = tokens.filter(({ token }) =>
+      Expo.isExpoPushToken(token)
+    );
+    const messages = validTokens.map(({ token }) => ({
+      to: token,
+      title: title?.trim() || "New message",
+      body,
+      sound: "default",
+      data: {
+        ...data,
+        type: "chat",
+      },
+    }));
 
-    if (messages.length > 0) {
-      await expo.sendPushNotificationsAsync(messages);
+    if (messages.length === 0) return;
+
+    const tickets = await expo.sendPushNotificationsAsync(messages);
+
+    for (let i = 0; i < tickets.length; i++) {
+      const ticket = tickets[i];
+      const token = messages[i].to;
+
+      if (ticket.status === "error") {
+        console.error(`[push] Error for ${token}:`, ticket.message);
+
+        const isStale =
+          ticket.details?.error === "DeviceNotRegistered" ||
+          ticket.message?.includes("DeviceNotRegistered");
+
+        if (isStale) {
+          await prisma.notificationToken.deleteMany({
+            where: { token },
+          });
+          console.log(`[push] Removed stale token: ${token}`);
+        }
+      }
     }
   } catch (err) {
     console.error(`[push] Failed for user ${userId}:`, err);
   }
 };
-
 // @todo TEST
 export async function sendPushNotification(token: string, message: string) {
   console.log(`[📡] Attempting to send push to token: ${token}`);

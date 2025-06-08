@@ -82,11 +82,11 @@ export const sendMessageTx = async ({
 
     sendNewMessagePushNotification({
       userId: memberId,
-      title: room.name || "New message",
+      title: room.name?.trim() || "New message",
       body: isSystemMessage
         ? finalMessageContent
         : `${displayName}: ${finalMessageContent}`,
-      data: { roomId },
+      data: { roomId, type: "chat" },
     });
   }
 
