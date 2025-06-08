@@ -1,8 +1,7 @@
-import { GraphQLContext } from "@/app/context";
-import { logger } from "@/lib/logger";
 import { addMembersToRoom } from "../db/addMembersToRoom.db";
 import { sendMessageService } from "@/domains/chat/services/message.service";
 import { ChatErrors } from "@/domains/shared/errors";
+import { GraphQLContext } from "@/types/graphql-context";
 
 type AddMemberToRoom = {
   roomId: string;
