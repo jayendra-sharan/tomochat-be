@@ -8,6 +8,7 @@ import { PrismaClient, User } from "@/generated/prisma/client";
 import { DbTx } from "@/lib/prisma";
 import { sendNewMessagePushNotification } from "@/domains/notification/service";
 import { ChatErrors } from "@/domains/shared/errors";
+import { logger } from "@/lib/logger";
 
 type SendMessageInput = {
   roomId: string;
@@ -80,6 +81,7 @@ export const sendMessageTx = async ({
       });
 
       if (!isSystemMessage) {
+        logger.info("Sending push notifications to", { memberId });
         sendNewMessagePushNotification({
           userId: memberId,
           title: room.name?.trim() || "New message",
