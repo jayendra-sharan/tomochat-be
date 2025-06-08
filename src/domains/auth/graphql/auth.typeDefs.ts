@@ -22,6 +22,7 @@ export const authTypeDefs = gql`
     displayName: String!
     password: String!
     userType: String
+    inviteLink: String
   }
 
   input LoginInput {

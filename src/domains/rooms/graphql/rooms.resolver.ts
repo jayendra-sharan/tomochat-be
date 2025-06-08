@@ -9,70 +9,74 @@ import { formatLastMessage } from "../utils/formatLastMessage";
 export const roomsResolvers = {
   Query: {
     rooms: async (_, __, { userId, prisma }) => {
-      if (!userId) return "User not authenticated!";
-
-      const memberships = await prisma.roomMember.findMany({
-        where: {
-          userId,
-        },
-        include: {
-          room: {
-            include: {
-              members: {
-                include: {
-                  user: true,
-                },
-              },
-              messages: {
-                take: 1,
-                orderBy: { createdAt: "desc" },
-                where: {
-                  perUserStatus: {
-                    none: {
-                      userId,
-                      isDeleted: true,
-                    },
+      try {
+        if (!userId) throw new Error("User not authenticated");
+        const memberships = await prisma.roomMember.findMany({
+          where: {
+            userId,
+          },
+          include: {
+            room: {
+              include: {
+                members: {
+                  include: {
+                    user: true,
                   },
                 },
-                include: {
-                  sender: true,
-                  perUserStatus: {
-                    where: { userId },
-                    select: {
-                      isRead: true,
+                messages: {
+                  take: 1,
+                  orderBy: { createdAt: "desc" },
+                  where: {
+                    perUserStatus: {
+                      none: {
+                        userId,
+                        isDeleted: true,
+                      },
+                    },
+                  },
+                  include: {
+                    sender: true,
+                    perUserStatus: {
+                      where: { userId },
+                      select: {
+                        isRead: true,
+                      },
                     },
                   },
                 },
               },
             },
           },
-        },
-        orderBy: {
-          room: {
-            updatedAt: "desc",
+          orderBy: {
+            room: {
+              updatedAt: "desc",
+            },
           },
-        },
-      });
+        });
 
-      const rooms = memberships.map((m) => {
-        // @todo refactor
-        const room = m.room;
-        const lastMessage = room.messages?.[0];
-        const isUnread = !lastMessage?.perUserStatus?.[0].isRead;
-        const lastMessageSender = lastMessage?.sender;
-        const lastMessageAt = lastMessage?.createdAt;
-        return {
-          ...room,
-          lastMessage: formatLastMessage(
-            lastMessageSender,
-            lastMessage?.content,
-            userId
-          ),
-          lastMessageAt,
-          isUnread,
-        };
-      });
-      return rooms;
+        const rooms = memberships.map((m) => {
+          // @todo refactor
+          const room = m.room;
+          const lastMessage = room.messages?.[0];
+          const isUnread = !lastMessage?.perUserStatus?.[0].isRead;
+          const lastMessageSender = lastMessage?.sender;
+          const lastMessageAt = lastMessage?.createdAt;
+          return {
+            ...room,
+            lastMessage: formatLastMessage(
+              lastMessageSender,
+              lastMessage?.content,
+              userId
+            ),
+            lastMessageAt,
+            isUnread,
+          };
+        });
+        return rooms;
+      } catch (error) {
+        logger.error("Error in fetching rooms", error);
+        throw new Error(error);
+      }
     },
     getRoomDetails: async (_: any, { input }, { userId, prisma }) => {
       if (!userId) {
@@ -142,7 +146,6 @@ export const roomsResolvers = {
       }
     },
     joinRoom: async (_, { input }, { user, prisma, io }) => {
-      console.log("join room", input);
       return joinRoomService({ input, user, prisma, io });
     },
     deleteRoom: async (_: any, { input }, { prisma, userId }) => {

@@ -57,7 +57,7 @@ model Room {
 
 model RoomMember {
   id       String   @id @default(cuid())
-  user     User     @relation(fields: [userId], references: [id])
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId   String
   room     Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
   roomId   String

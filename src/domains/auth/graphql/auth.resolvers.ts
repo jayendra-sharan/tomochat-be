@@ -4,6 +4,10 @@ import bcryptjs from "bcryptjs";
 import { verifyEmailCode } from "../service/emailVerification";
 import { createJwt } from "@/lib/jwt";
 import { getAuthService } from "../service/auth.service";
+import { logger } from "@/lib/logger";
+import { joinRoomService } from "@/domains/rooms/services/joinRoom.service";
+
+const isDev = process.env.NODE_ENV === "development";
 
 export const authResolvers = {
   Query: {
@@ -54,7 +58,7 @@ export const authResolvers = {
     },
   },
   Mutation: {
-    createUser: async (_, { input }, { prisma }) => {
+    createUser: async (_, { input }, { prisma, io }) => {
       const existing = await prisma.user.findUnique({
         where: { email: input.email },
       });
@@ -67,10 +71,19 @@ export const authResolvers = {
           displayName: input.displayName,
           userType: input.userType || "human",
           password: hashedPassword,
+          isEmailVerified: isDev,
         },
       });
 
-      await requestEmailVerification(user.email);
+      if (input.inviteLink) {
+        joinRoomService({ input, user, prisma, io }).then(() => {
+          logger.info("User added to room during user create");
+        });
+      }
+
+      if (!isDev) {
+        await requestEmailVerification(user.email);
+      }
       return user;
     },
     requestEmailVerification: async (_, { input }) => {
