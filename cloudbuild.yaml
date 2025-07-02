@@ -8,27 +8,33 @@ steps:
         npm ci
         npx prisma migrate deploy
 
-  - name: 'gcr.io/cloud-builders/docker'
+  - name: gcr.io/cloud-builders/docker
     args:
-      [
-        'buildx', 'build',
-        '--platform=linux/amd64',
-        '--tag', 'europe-west4-docker.pkg.dev/$PROJECT_ID/tomochat-repo/tomochat-be',
-        '--push',
-        '.'
-      ]
+      - buildx
+      - build
+      - --platform=linux/amd64
+      - --tag
+      - europe-west4-docker.pkg.dev/$PROJECT_ID/tomochat-repo/tomochat-be
+      - --push
+      - .
 
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
     args:
-      [
-        'gcloud', 'run', 'deploy', 'tomochat-be',
-        '--image', 'europe-west4-docker.pkg.dev/$PROJECT_ID/tomochat-repo/tomochat-be',
-        '--region', 'europe-west4',
-        '--platform', 'managed',
-        '--allow-unauthenticated',
-        '--add-cloudsql-instances', 'tomochat-464710:europe-west4:tomochat-db',
-        '--set-secrets', 'DATABASE_URL=DATABASE_URL:latest'
-      ]
+      - gcloud
+      - run
+      - deploy
+      - tomochat-be
+      - --image
+      - europe-west4-docker.pkg.dev/$PROJECT_ID/tomochat-repo/tomochat-be
+      - --region
+      - europe-west4
+      - --platform
+      - managed
+      - --allow-unauthenticated
+      - --add-cloudsql-instances
+      - tomochat-464710:europe-west4:tomochat-db
+      - --set-secrets
+      - DATABASE_URL=DATABASE_URL:latest
 
 availableSecrets:
   secretManager:
