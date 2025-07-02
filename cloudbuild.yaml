@@ -38,4 +38,4 @@ steps:
       - --add-cloudsql-instances
       - tomochat-464710:europe-west4:tomochat-db
       - --set-secrets
-      - DATABASE_URL=DATABASE_URL:latest
+      - DATABASE_URL=projects/tomochat-464710/secrets/DATABASE_URL:latest
