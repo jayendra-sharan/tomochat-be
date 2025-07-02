@@ -18,7 +18,7 @@ steps:
       - build
       - --platform=linux/amd64
       - --tag
-      - europe-west4-docker.pkg.dev/$PROJECT_ID/tomochat-repo/tomochat-be
+      - europe-west4-docker.pkg.dev/tomochat-464710/tomochat-repo/tomochat-be
       - --push
       - .
 
@@ -29,7 +29,7 @@ steps:
       - deploy
       - tomochat-be
       - --image
-      - europe-west4-docker.pkg.dev/$PROJECT_ID/tomochat-repo/tomochat-be
+      - europe-west4-docker.pkg.dev/tomochat-464710/tomochat-repo/tomochat-be
       - --region
       - europe-west4
       - --platform
