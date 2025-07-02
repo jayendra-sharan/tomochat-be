@@ -1,13 +1,13 @@
 import { Request, Response } from "express";
 import bcryptjs from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 
 // Route handler to create a new user and perform string matching from query param
 export const createTomo = async (req: Request, res: Response) => {
   try {
     // Extract user data from request body (update fields as needed)
     const { token } = req.query;
-
     if (token !== "1514") {
       throw new Error("Unauthorized access");
     }
@@ -32,6 +32,7 @@ export const createTomo = async (req: Request, res: Response) => {
       user: JSON.stringify(user),
     });
   } catch (error) {
+    logger.error(error);
     res.status(500).json({ error: "Failed to create user" });
   }
 };
