@@ -1,35 +1,30 @@
-options:
-  logging: CLOUD_LOGGING_ONLY
 steps:
-  - name: 'node:20'
+  - name: node:20
     entrypoint: bash
-    env:
-      - DATABASE_URL=projects/tomochat-464710/secrets/DATABASE_URL:latest
+    secretEnv: ['DATABASE_URL']
     args:
       - -c
       - |
-          echo "DATABASE_URL is $DATABASE_URL"
-          npm ci
-          npx prisma migrate deploy
+        npm ci
 
-  - name: 'gcr.io/cloud-builders/docker'
+  - name: gcr.io/cloud-builders/docker
     args:
       - buildx
       - build
       - --platform=linux/amd64
       - --tag
-      - europe-west4-docker.pkg.dev/tomochat-464710/tomochat-repo/tomochat-be
+      - europe-west4-docker.pkg.dev/$PROJECT_ID/tomochat-repo/tomochat-be
       - --push
       - .
 
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
     args:
       - gcloud
       - run
       - deploy
       - tomochat-be
       - --image
-      - europe-west4-docker.pkg.dev/tomochat-464710/tomochat-repo/tomochat-be
+      - europe-west4-docker.pkg.dev/$PROJECT_ID/tomochat-repo/tomochat-be
       - --region
       - europe-west4
       - --platform
@@ -38,4 +33,9 @@ steps:
       - --add-cloudsql-instances
       - tomochat-464710:europe-west4:tomochat-db
       - --set-secrets
-      - DATABASE_URL=projects/tomochat-464710/secrets/DATABASE_URL:latest
+      - DATABASE_URL=DATABASE_URL:latest
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/995534968592/secrets/DATABASE_URL/versions/1
+      env: DATABASE_URL
