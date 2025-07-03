@@ -34,11 +34,8 @@ steps:
       - --allow-unauthenticated
       - --add-cloudsql-instances
       - tomochat-464710:europe-west4:tomochat-db
-      - --set-secrets
-      - DATABASE_URL=DATABASE_URL:latest
 
 availableSecrets:
   secretManager:
-    secrets:
-      - versionName: projects/995534968592/secrets/DATABASE_URL/versions/1
-        env: DATABASE_URL
+    - versionName: projects/995534968592/secrets/DATABASE_URL/versions/1
+      env: DATABASE_URL

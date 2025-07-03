@@ -10,7 +10,7 @@ RUN npm ci
 
 # ---- Copy source files ----
 COPY . .
-COPY .env.production .env
+
 # ---- Build the app ----
 RUN npm run build:prod
 
