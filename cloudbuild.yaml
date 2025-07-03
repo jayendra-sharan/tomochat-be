@@ -1,3 +1,5 @@
+options:
+  logging: CLOUD_LOGGING_ONLY
 steps:
   - name: node:20
     entrypoint: bash
@@ -37,5 +39,6 @@ steps:
 
 availableSecrets:
   secretManager:
-    - versionName: projects/995534968592/secrets/DATABASE_URL/versions/1
-      env: DATABASE_URL
+    secrets:
+      - versionName: projects/995534968592/secrets/DATABASE_URL/versions/1
+        env: DATABASE_URL
