@@ -3,7 +3,7 @@ import { Suggestion } from "@/domains/shared/types";
 
 type CreateMessageDbType = {
   prisma: DbTx;
-  user: {id: string; displayName: string};
+  user: { id: string; displayName: string };
   roomId: string;
 }
 
@@ -24,8 +24,7 @@ export function createMessageDb({
             suggestion
           },
           include: {
-            sender: true,
-            room: true,
+            sender: true
           }
         });
       } catch (error) {
@@ -54,9 +53,9 @@ export function createMessageDb({
           where: { roomId },
           select: { userId: true },
         });
-  
+
         const membersId = members.map((m) => m.userId);
-  
+
         await prisma.messageStatus.createMany({
           data: membersId.map((userId) => ({
             messageId,

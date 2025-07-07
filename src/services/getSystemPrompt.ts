@@ -1,4 +1,4 @@
-import { basePrompt } from "./basePrompt";
+import { getBasePrompt } from "./basePrompt";
 import { getSample } from "./samples";
 import { supportedLanguage } from "./types";
 
@@ -21,7 +21,7 @@ const defaultLanguage = process.env.DEFAULT_LANGUAGE || "English";
 export const getSystemPrompt = (languageCode: supportedLanguage) => {
   const regex = /{{TARGET_LANGUAGE}}/g;
   const nativeLanguage = /{{NATIVE_LANGUAGE}}/g;
-  return basePrompt
+  return getBasePrompt()
     .replace(regex, languageMap[languageCode])
     .replace(nativeLanguage, defaultLanguage)
     .replace("{{TARGET_LANGUAGE_SAMPLES}}", getSample(languageCode));
